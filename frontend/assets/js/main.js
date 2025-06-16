@@ -1,6 +1,6 @@
 // frontend/assets/js/main.js
 
-const API_BASE_URL = 'http://127.0.0.1:5000/api'; // Asegúrate que esta URL coincida con tu backend
+const API_BASE_URL = 'https://cancer-predictor-ed.onrender.com/'; // Asegúrate que esta URL coincida con tu backend
 
 // Referencias a elementos del DOM
 const introductionSection = document.getElementById('introduction');
