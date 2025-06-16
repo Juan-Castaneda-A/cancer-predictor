@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from backend.config import Config
-from routes.predict_routes import predict_bp
+from backend.routes.predict_routes import predict_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
