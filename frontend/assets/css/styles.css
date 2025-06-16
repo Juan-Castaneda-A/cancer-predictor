@@ -1,0 +1,238 @@
+/* frontend/assets/css/style.css */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa; /* Gris muy claro */
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 25px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+header {
+    background-color: #e0f2f7; /* Azul claro para encabezado */
+    color: #212529;
+    padding: 30px 0;
+    text-align: center;
+    border-bottom: 5px solid #add8e6; /* Borde más oscuro */
+}
+
+h1, h2, h3 {
+    color: #007bff; /* Azul vibrante */
+    margin-bottom: 15px;
+}
+
+p {
+    margin-bottom: 10px;
+}
+
+.model-selection {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.model-selection button {
+    background-color: #28a745; /* Verde para los botones principales */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    margin: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.model-selection button:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+.model-selection button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Formulario */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group select {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box; /* Incluye padding y border en el ancho total */
+}
+
+.form-group input[type="radio"] {
+    margin-right: 5px;
+}
+
+#calculate-btn {
+    background-color: #007bff; /* Azul para el botón de cálculo */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+#calculate-btn:hover {
+    background-color: #0056b3;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 10px;
+    font-style: italic;
+    color: #666;
+}
+
+.error-message {
+    color: #dc3545; /* Rojo para errores */
+    font-weight: bold;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Resultados */
+#main-result {
+    text-align: center;
+    font-size: 1.5em;
+    margin-bottom: 25px;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 400px; /* Altura fija para el gráfico */
+    margin: 25px 0;
+}
+
+.interpretation {
+    background-color: #f1f8e9; /* Verde claro para interpretación */
+    border-left: 5px solid #8bc34a;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.interpretation h4 {
+    margin-top: 15px;
+    color: #6a1b9a; /* Púrpura para títulos de subsecciones */
+}
+
+.math-formula {
+    text-align: center;
+    font-size: 1.2em;
+    font-family: 'Times New Roman', serif; /* Mejor para fórmulas */
+    margin: 15px 0;
+}
+
+pre {
+    background-color: #e9ecef;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+}
+
+.disclaimer {
+    background-color: #ffe0b2; /* Naranja claro para advertencia */
+    border-left: 5px solid #ff9800;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 30px;
+    font-size: 0.95em;
+    color: #795548;
+}
+
+.disclaimer h3 {
+    color: #d32f2f; /* Rojo oscuro para el título de advertencia */
+}
+
+.actions {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.actions button {
+    background-color: #6c757d; /* Gris para botones de acción */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    margin: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.actions button:hover {
+    background-color: #5a6268;
+}
+
+.actions button#btnNewPrediction {
+    background-color: #17a2b8; /* Turquesa para "Nueva Predicción" */
+}
+
+.actions button#btnNewPrediction:hover {
+    background-color: #138496;
+}
+
+
+/* Utilidades */
+.hidden {
+    display: none !important;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    background-color: #e0f2f7;
+    color: #555;
+    font-size: 0.9em;
+    border-top: 1px solid #add8e6;
+}
+
+/* Responsividad básica */
+@media (max-width: 768px) {
+    .container {
+        margin: 20px 15px;
+        padding: 15px;
+    }
+    .model-selection button {
+        width: calc(100% - 20px);
+        margin: 5px 10px;
+    }
+}

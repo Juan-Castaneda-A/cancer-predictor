@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelos Predictivos en Cáncer de Mama</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Modelos Predictivos en Cáncer de Mama</h1>
+        <p>Estimación del tiempo hasta un umbral crítico de vida</p>
+    </header>
+
+    <main>
+        <section id="introduction" class="container">
+            <h2>Bienvenido/a</h2>
+            <p>Explore los siguientes modelos matemáticos para estimar la progresión del tumor y el tiempo de vida hasta un umbral crítico en pacientes con cáncer de mama. Esta herramienta es de carácter **educativo y no sustituye el consejo médico profesional.**</p>
+            <p>Destacamos la utilidad de las ecuaciones diferenciales en la oncología y cómo esta herramienta puede servir como apoyo académico o investigativo.</p>
+            
+            <div class="model-selection">
+                <button id="btnExponential" data-model="exponencial">Probar Modelo Exponencial</button>
+                <button id="btnGompertz" data-model="gompertz">Probar Modelo Gompertz</button>
+                <button id="btnCalibrate" disabled>Calibrar Modelo con Datos Reales (Próximamente)</button>
+            </div>
+        </section>
+
+        <section id="prediction-form-section" class="container hidden">
+            <h2>Calculadora de Predicción <span id="model-name"></span></h2>
+            <form id="predictionForm">
+                <h3>1. Información Básica del Paciente (Opcional)</h3>
+                <div class="form-group">
+                    <label for="nombre_paciente">Nombre/ID:</label>
+                    <input type="text" id="nombre_paciente" name="nombre_paciente">
+                </div>
+                <div class="form-group">
+                    <label for="fecha_diagnostico">Fecha de Diagnóstico:</label>
+                    <input type="date" id="fecha_diagnostico" name="fecha_diagnostico">
+                </div>
+
+                <h3>2. Parámetros Clínicos Clave</h3>
+                <div class="form-group">
+                    <label for="T0">Tamaño Inicial del Tumor (cm³):</label>
+                    <input type="number" id="T0" name="T0" step="0.01" min="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="r">Tasa de Crecimiento (r):</label>
+                    <input type="number" id="r" name="r" step="0.001" min="0.0001" required>
+                </div>
+                <div class="form-group" id="K-group">
+                    <label for="K">Capacidad Máxima del Tumor (K, cm³):</label>
+                    <input type="number" id="K" name="K" step="0.01" min="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="T_critical">Umbral Crítico del Tumor (cm³):</label>
+                    <input type="number" id="T_critical" name="T_critical" step="0.01" min="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="dias_tratamiento">Días en Tratamiento (opcional):</label>
+                    <input type="number" id="dias_tratamiento" name="dias_tratamiento" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="estadio">Etapa del Cáncer (AJCC):</label>
+                    <select id="estadio" name="estadio">
+                        <option value="">Seleccione</option>
+                        <option value="I">Etapa I</option>
+                        <option value="II">Etapa II</option>
+                        <option value="III">Etapa III</option>
+                        <option value="IV">Etapa IV</option>
+                    </select>
+                </div>
+
+                <h3>3. Otros Factores (Opcional)</h3>
+                <div class="form-group">
+                    <label>Receptores Hormonales (ER/PR):</label>
+                    <div>
+                        <input type="radio" id="er_pr_pos" name="er_pr" value="positivo"> <label for="er_pr_pos">Positivo</label>
+                        <input type="radio" id="er_pr_neg" name="er_pr" value="negativo"> <label for="er_pr_neg">Negativo</label>
+                        <input type="radio" id="er_pr_desc" name="er_pr" value="desconocido" checked> <label for="er_pr_desc">Desconocido</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tipo_cancer">Tipo de Cáncer:</label>
+                    <select id="tipo_cancer" name="tipo_cancer">
+                        <option value="">Seleccione</option>
+                        <option value="Ductal Invasivo">Ductal Invasivo</option>
+                        <option value="Lobulillar Invasivo">Lobulillar Invasivo</option>
+                        <option value="Medular">Medular</option>
+                        <option value="Mucinoso">Mucinoso</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Estado HER2:</label>
+                    <div>
+                        <input type="radio" id="her2_pos" name="her2" value="positivo"> <label for="her2_pos">Positivo</label>
+                        <input type="radio" id="her2_neg" name="her2" value="negativo"> <label for="her2_neg">Negativo</label>
+                        <input type="radio" id="her2_desc" name="her2" value="desconocido" checked> <label for="her2_desc">Desconocido</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edad">Edad del Paciente:</label>
+                    <input type="number" id="edad" name="edad" min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="metastasis">Historial de Metástasis:</label>
+                    <select id="metastasis" name="metastasis">
+                        <option value="no">No</option>
+                        <option value="si">Sí</option>
+                        <option value="desconocido">Desconocido</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="calculate-btn">Calcular Predicción</button>
+                <div id="loading-message" class="loading-spinner hidden">Calculando...</div>
+                <div id="form-error-message" class="error-message hidden"></div>
+            </form>
+        </section>
+
+        <section id="results-section" class="container hidden">
+            <h2>Resultados de la Predicción</h2>
+            <div id="main-result">
+                Tiempo estimado para alcanzar el umbral crítico: <strong id="tiempo-estimado">--</strong> <span id="unidad-tiempo"></span>
+                <br>
+                Intervalo de confianza: <span id="intervalo-confianza">--</span>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="tumorGrowthChart"></canvas>
+            </div>
+            
+            <div class="interpretation">
+                <h3>Interpretación del Modelo y Datos</h3>
+                <p id="interpretation-text"></p>
+                <h4>Fórmula Matemática Utilizada:</h4>
+                <p class="math-formula" id="math-formula"></p>
+                <h4>Parámetros Usados:</h4>
+                <pre id="params-used"></pre>
+            </div>
+
+            <div class="disclaimer">
+                <h3>Importante: Descargo de Responsabilidad Médico</h3>
+                <p>Este modelo es una **simulación matemática con fines educativos y académicos únicamente.** No está diseñado para ser una herramienta de diagnóstico, pronóstico o tratamiento médico. Las predicciones se basan en modelos simplificados y no consideran todas las complejidades biológicas individuales de cada paciente.</p>
+                <p><strong>Bajo ninguna circunstancia debe utilizar esta herramienta para tomar decisiones sobre su salud o la de otros.</strong> Siempre consulte a un profesional médico calificado para cualquier problema de salud, diagnóstico o plan de tratamiento.</p>
+            </div>
+
+            <div class="actions">
+                <button id="btnNewPrediction">Nueva Predicción</button>
+                <button id="btnExportPdf" disabled>Exportar a PDF (Próximamente)</button>
+            </div>
+        </section>
+
+        <section id="about-section" class="container">
+            <h2>Acerca de / Metodología</h2>
+            <p>Este proyecto explora la aplicación de modelos de ecuaciones diferenciales en el estudio del crecimiento tumoral. Los modelos exponencial y de Gompertz son herramientas fundamentales en la biofísica para describir dinámicas de poblaciones y crecimiento celular, incluyendo la progresión de tumores.</p>
+            
+            <h3>Modelo Exponencial</h3>
+            <p>Describe un crecimiento ilimitado donde la tasa de cambio es directamente proporcional al tamaño actual. Es útil para las fases tempranas de crecimiento tumoral.</p>
+            <p class="math-formula">$$\frac{dT}{dt} = rT \quad \Rightarrow \quad T(t) = T_0 \cdot e^{rt}$$</p>
+            <ul>
+                <li>$T(t)$: Tamaño del tumor en el tiempo $t$</li>
+                <li>$T_0$: Tamaño inicial del tumor</li>
+                <li>$r$: Tasa de crecimiento</li>
+            </ul>
+
+            <h3>Modelo de Gompertz</h3>
+            <p>Este modelo es más realista para el crecimiento tumoral a largo plazo, ya que incorpora una desaceleración de la tasa de crecimiento a medida que el tumor se acerca a su capacidad máxima ($K$), reflejando limitaciones de recursos o espacio.</p>
+            <p class="math-formula">$$\frac{dT}{dt} = rT \cdot \ln\left(\frac{K}{T}\right) \quad \Rightarrow \quad T(t) = K \cdot \exp\left( \ln\left(\frac{T_0}{K}\right) \cdot \exp(-rt) \right)$$</p>
+            <ul>
+                <li>$T(t)$: Tamaño del tumor en el tiempo $t$</li>
+                <li>$T_0$: Tamaño inicial del tumor</li>
+                <li>$r$: Tasa de crecimiento inicial</li>
+                <li>$K$: Capacidad máxima del tumor</li>
+            </ul>
+
+            <p>Es importante recordar que estos modelos son simplificaciones y no capturan la complejidad total de los sistemas biológicos, incluyendo factores como la respuesta inmune del paciente, la heterogeneidad tumoral, la resistencia a tratamientos o la influencia de comorbilidades. Su aplicación debe ser siempre en un contexto de investigación o educación.</p>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Proyecto Educativo. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/chart_renderer.js"></script>
+</body>
+</html>
