@@ -1,4 +1,4 @@
-from models import exponential_model, gompertz_model
+from backend.models import exponential_model, gompertz_model
 import numpy as np
 
 def get_prediction_data(model_type, T0, r, K, T_critical, other_factors):
