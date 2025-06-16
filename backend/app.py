@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # Configurar CORS para permitir solicitudes desde el frontend
-CORS(app, resources={r"/api/*": {"origins": "https://cancer-frontend.onrender.com/"}}) # Más específico si quieres
+CORS(app, resources={r"/api/*": {"origins": "https://cancer-frontend.onrender.com"}}) # Más específico si quieres
 
 # Registrar Blueprints
 app.register_blueprint(predict_bp, url_prefix='/api')

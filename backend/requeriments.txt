@@ -1,5 +1,5 @@
 Flask
-Flask-Cors
+flask-cors
 numpy
 scipy
 gunicorn
