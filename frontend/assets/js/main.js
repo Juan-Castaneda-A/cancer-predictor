@@ -18,11 +18,16 @@ const btnGompertz = document.getElementById('btnGompertz');
 const btnCalibrate = document.getElementById('btnCalibrate');
 
 const modelNameSpan = document.getElementById('model-name');
+<<<<<<< HEAD
+=======
+const KGroup = document.getElementById('K-group');
+>>>>>>> parent of a831574 (fase2)
 const predictionForm = document.getElementById('predictionForm');
 const calculateBtn = document.getElementById('calculate-btn');
 const loadingMessage = document.getElementById('loading-message');
 const formErrorMessage = document.getElementById('form-error-message');
 
+<<<<<<< HEAD
 // Nuevas referencias para la gestión de pacientes y visitas
 const patientSelect = document.getElementById('patient_select');
 const newPatientFields = document.getElementById('new-patient-fields');
@@ -53,6 +58,14 @@ const paramsUsedPre = document.getElementById('params-used');
 const patientDataSentPre = document.getElementById('patient-data-sent');
 const disclaimerText = document.getElementById('disclaimer-text');
 const patientHistoryTableDiv = document.getElementById('patient-history-table');
+=======
+const tiempoEstimadoSpan = document.getElementById('tiempo-estimado');
+const unidadTiempoSpan = document.getElementById('unidad-tiempo');
+const intervaloConfianzaSpan = document.getElementById('intervalo-confianza');
+const interpretationText = document.getElementById('interpretation-text');
+const mathFormulaDiv = document.getElementById('math-formula');
+const paramsUsedPre = document.getElementById('params-used');
+>>>>>>> parent of a831574 (fase2)
 
 const btnNewPrediction = document.getElementById('btnNewPrediction');
 const btnExportPdf = document.getElementById('btnExportPdf');
@@ -91,17 +104,28 @@ function clearFormFields() {
 function updateFormForModel(model) {
     selectedModel = model;
     modelNameSpan.textContent = model === 'exponencial' ? 'Exponencial' : 'Gompertz';
+<<<<<<< HEAD
     rDescription.classList.remove('hidden'); // La descripción de r/K/umbral siempre se muestra
 
     // Asegurarse de que los campos de visitas subsecuentes estén ocultos al seleccionar el modelo
     isFirstVisitYes.checked = true;
     toggleSubsequentVisitFields();
 
+=======
+    if (model === 'exponencial') {
+        KGroup.classList.add('hidden');
+        document.getElementById('K').removeAttribute('required');
+    } else { // Gompertz
+        KGroup.classList.remove('hidden');
+        document.getElementById('K').setAttribute('required', 'true');
+    }
+>>>>>>> parent of a831574 (fase2)
     showSection('prediction-form-section');
     scrollToSection('prediction-form-section');
     loadPatients(); // Cargar pacientes al entrar al formulario de predicción
 }
 
+<<<<<<< HEAD
 function toggleSubsequentVisitFields() {
     const isFirstVisit = isFirstVisitYes.checked;
     if (isFirstVisit) {
@@ -117,6 +141,28 @@ function toggleSubsequentVisitFields() {
     }
     clearFormError();
     loadPrevVisitError.classList.add('hidden'); // Ocultar errores de historial al cambiar
+=======
+function displayResults(data) {
+    showSection('results-section');
+    scrollToSection('results-section');
+
+    tiempoEstimadoSpan.textContent = data.tiempo_estimado;
+    unidadTiempoSpan.textContent = data.unidad;
+    intervaloConfianzaSpan.textContent = data.intervalo_confianza;
+    paramsUsedPre.textContent = JSON.stringify(data.parametros_usados, null, 2);
+
+    interpretationText.innerHTML = `Utilizando el **Modelo ${data.modelo_usado.charAt(0).toUpperCase() + data.modelo_usado.slice(1)}** con los parámetros proporcionados, el tamaño del tumor se estima que alcanzará el umbral crítico de **${data.parametros_usados.T_critical} cm³** en aproximadamente **${data.tiempo_estimado} ${data.unidad}**.`;
+
+    // Renderizar la fórmula LaTeX con MathJax
+    mathFormulaDiv.textContent = `$$${data.ecuacion_latex}$$`;
+    MathJax.typesetPromise([mathFormulaDiv]).then(() => {
+        // Callback después de MathJax, si es necesario
+    }).catch((err) => console.error('MathJax rendering failed:', err));
+
+
+    // Llamar a la función de renderizado del gráfico de chart_renderer.js
+    renderTumorGrowthChart(data.puntos_curva, data.parametros_usados.T0, data.parametros_usados.T_critical);
+>>>>>>> parent of a831574 (fase2)
 }
 
 function showLoading(show) {
@@ -317,15 +363,19 @@ function renderPatientHistoryTable(history) {
 btnExponential.addEventListener('click', () => updateFormForModel('exponencial'));
 btnGompertz.addEventListener('click', () => updateFormForModel('gompertz'));
 
+<<<<<<< HEAD
 isFirstVisitYes.addEventListener('change', toggleSubsequentVisitFields);
 isFirstVisitNo.addEventListener('change', toggleSubsequentVisitFields);
 
+=======
+>>>>>>> parent of a831574 (fase2)
 predictionForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     clearFormError();
     showLoading(true);
 
     const formData = new FormData(predictionForm);
+<<<<<<< HEAD
     const patientData = {};
 
     // Obtener el ID del paciente seleccionado (si existe)
@@ -345,10 +395,26 @@ predictionForm.addEventListener('submit', async (event) => {
                 patientData[key] = parseInt(value);
             } else {
                 patientData[key] = value;
+=======
+    const data = {
+        model_type: selectedModel
+    };
+
+    // Recoger todos los campos del formulario
+    for (const [key, value] of formData.entries()) {
+        if (value) { // Solo añadir si hay un valor
+            if (['T0', 'r', 'K', 'T_critical'].includes(key)) {
+                data[key] = parseFloat(value);
+            } else if (['dias_tratamiento', 'edad'].includes(key)) {
+                data[key] = parseInt(value);
+            } else {
+                data[key] = value;
+>>>>>>> parent of a831574 (fase2)
             }
         }
     }
 
+<<<<<<< HEAD
     // Validar campos requeridos para nuevo paciente si no hay ID seleccionado
     if (!selectedPatientId) {
         if (!patientData.identificacion || !patientData.nombre_paciente) {
@@ -363,6 +429,11 @@ predictionForm.addEventListener('submit', async (event) => {
         displayFormError("Para una visita subsecuente, el tamaño del tumor anterior y la fecha de la visita anterior son obligatorios.");
         showLoading(false);
         return;
+=======
+    // Asegurarse de que K sea null si es exponencial y no fue llenado
+    if (selectedModel === 'exponencial' && !data.K) {
+        data.K = null;
+>>>>>>> parent of a831574 (fase2)
     }
 
     // El backend necesita saber si se seleccionó un paciente existente o si se debe crear uno nuevo.
@@ -375,11 +446,15 @@ predictionForm.addEventListener('submit', async (event) => {
             headers: {
                 'Content-Type': 'application/json'
             },
+<<<<<<< HEAD
             body: JSON.stringify({
                 model_type: selectedModel,
                 patient_data: patientData,
                 doctor_code: doctorCode // Enviar el código del doctor en cada solicitud
             })
+=======
+            body: JSON.stringify(data)
+>>>>>>> parent of a831574 (fase2)
         });
 
         const result = await response.json();
@@ -393,7 +468,7 @@ predictionForm.addEventListener('submit', async (event) => {
         }
     } catch (error) {
         console.error('Error de conexión:', error);
-        displayFormError('No se pudo conectar con el servidor. Asegúrate de que el backend esté ejecutándose y la URL sea correcta.');
+        displayFormError('No se pudo conectar con el servidor. Asegúrate de que el backend esté ejecutándose.');
     } finally {
         showLoading(false);
     }
@@ -403,12 +478,21 @@ btnNewPrediction.addEventListener('click', () => {
     clearFormFields(); // Limpiar y restablecer todo
     showSection('introduction');
     scrollToSection('introduction');
+<<<<<<< HEAD
     patientHistoryTableDiv.innerHTML = '<p>No hay historial de visitas previo registrado para este paciente.</p>'; // Limpiar historial
+=======
+    // Reiniciar estado visual del formulario si es necesario
+    KGroup.classList.add('hidden'); 
+>>>>>>> parent of a831574 (fase2)
 });
 
 // Inicialización: mostrar solo la sección de login al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
+<<<<<<< HEAD
     showSection('doctor-login-section');
     toggleSubsequentVisitFields();
     rDescription.classList.remove('hidden');
+=======
+    showSection('introduction');
+>>>>>>> parent of a831574 (fase2)
 });

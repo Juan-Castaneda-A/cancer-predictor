@@ -2,14 +2,14 @@
 
 let tumorGrowthChartInstance = null; // Para guardar la instancia del gráfico
 
-function renderTumorGrowthChart(curvePoints, T0_for_graph, T_critical, estimatedTime, timeUnit) {
+function renderTumorGrowthChart(curvePoints, T0, T_critical) {
     const ctx = document.getElementById('tumorGrowthChart').getContext('2d');
 
     const labels = curvePoints.map(p => p.x.toFixed(0)); // Tiempo en el eje X
     const dataPoints = curvePoints.map(p => p.y); // Tamaño del tumor en el eje Y
 
     // Líneas horizontales para T0 y T_critical
-    const initialTumorLine = Array(labels.length).fill(T0_for_graph);
+    const initialTumorLine = Array(labels.length).fill(T0);
     const criticalThresholdLine = Array(labels.length).fill(T_critical);
 
     // Si ya existe una instancia de gráfico, destrúyela para crear una nueva
@@ -17,6 +17,7 @@ function renderTumorGrowthChart(curvePoints, T0_for_graph, T_critical, estimated
         tumorGrowthChartInstance.destroy();
     }
 
+<<<<<<< HEAD
     // Calcular el punto en el eje X para el tiempo estimado
     // No necesitamos findIndex, solo el punto final del tiempo estimado
 
@@ -33,6 +34,8 @@ function renderTumorGrowthChart(curvePoints, T0_for_graph, T_critical, estimated
         }];
     }
 
+=======
+>>>>>>> parent of a831574 (fase2)
     tumorGrowthChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
@@ -48,7 +51,7 @@ function renderTumorGrowthChart(curvePoints, T0_for_graph, T_critical, estimated
                 tension: 0.1
             },
             {
-                label: 'Tamaño Actual', 
+                label: 'Tamaño Inicial',
                 data: initialTumorLine,
                 borderColor: 'rgba(255, 193, 7, 0.7)', // Amarillo
                 borderDash: [5, 5],
@@ -64,23 +67,7 @@ function renderTumorGrowthChart(curvePoints, T0_for_graph, T_critical, estimated
                 borderWidth: 1,
                 pointRadius: 0,
                 fill: false
-            },
-            // Nuevo dataset para el punto de tiempo estimado, solo si existe
-            ...(estimatedTimePoint.length > 0 ? [{
-                label: `Tiempo Estimado (${estimatedTime.toFixed(2)} ${timeUnit})`,
-                data: estimatedTimePoint,
-                borderColor: '#28a745', // Verde para el punto de predicción
-                backgroundColor: '#28a745',
-                borderWidth: 3,
-                pointRadius: 8, // Hacer el punto visible
-                pointStyle: 'circle',
-                pointBackgroundColor: '#28a745',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                fill: false,
-                showLine: false // No conectar este punto con una línea
-            }] : [])
-            ]
+            }]
         },
         options: {
             responsive: true,
@@ -89,11 +76,16 @@ function renderTumorGrowthChart(curvePoints, T0_for_graph, T_critical, estimated
                 x: {
                     title: {
                         display: true,
+<<<<<<< HEAD
                         text: `Tiempo (días)` 
                     },
                     beginAtZero: true,
                     // Asegurarse de que el eje X abarque hasta el tiempo estimado + un margen
                     max: Math.max(curvePoints[curvePoints.length - 1].x, estimatedTime * 1.1) 
+=======
+                        text: 'Tiempo (días)'
+                    }
+>>>>>>> parent of a831574 (fase2)
                 },
                 y: {
                     title: {
@@ -102,28 +94,13 @@ function renderTumorGrowthChart(curvePoints, T0_for_graph, T_critical, estimated
                     },
                     beginAtZero: true,
                     // Asegurarse de que el eje Y muestre hasta el umbral crítico o un poco más
-                    suggestedMax: Math.max(T_critical * 1.2, T0_for_graph * 2, dataPoints.length > 0 ? Math.max(...dataPoints) * 1.1 : 0) 
+                    suggestedMax: Math.max(T_critical * 1.2, T0 * 2) 
                 }
             },
             plugins: {
                 tooltip: {
                     mode: 'index',
-                    intersect: false,
-                    callbacks: {
-                        title: function(context) {
-                            return `Tiempo: ${context[0].label} ${timeUnit}`;
-                        },
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.parsed.y !== null) {
-                                label += context.parsed.y.toFixed(2) + ' cm³';
-                            }
-                            return label;
-                        }
-                    }
+                    intersect: false
                 },
                 legend: {
                     display: true,
