@@ -17,25 +17,6 @@ function renderTumorGrowthChart(curvePoints, T0, T_critical) {
         tumorGrowthChartInstance.destroy();
     }
 
-<<<<<<< HEAD
-    // Calcular el punto en el eje X para el tiempo estimado
-    // No necesitamos findIndex, solo el punto final del tiempo estimado
-
-    let estimatedTimeValue = estimatedTime;
-    if (timeUnit === "años") {
-    estimatedTimeValue = estimatedTime * 365.25; // ✅ Convertir a días
-}
-
-    let estimatedTimePoint = [];
-    if (estimatedTime > 0) { // Solo añadir si hay un tiempo estimado válido
-        estimatedTimePoint = [{
-            x: estimatedTimeValue, // Usar el valor exacto del tiempo estimado
-            y: T_critical // Debe estar en el umbral crítico en ese tiempo
-        }];
-    }
-
-=======
->>>>>>> parent of a831574 (fase2)
     tumorGrowthChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
@@ -76,16 +57,8 @@ function renderTumorGrowthChart(curvePoints, T0, T_critical) {
                 x: {
                     title: {
                         display: true,
-<<<<<<< HEAD
-                        text: `Tiempo (días)` 
-                    },
-                    beginAtZero: true,
-                    // Asegurarse de que el eje X abarque hasta el tiempo estimado + un margen
-                    max: Math.max(curvePoints[curvePoints.length - 1].x, estimatedTime * 1.1) 
-=======
                         text: 'Tiempo (días)'
                     }
->>>>>>> parent of a831574 (fase2)
                 },
                 y: {
                     title: {
