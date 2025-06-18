@@ -127,7 +127,7 @@ def get_prediction_data(patient_data):
     T0_for_current_prediction = initial_tumor_size_form 
     
     # Umbral crítico
-    T_critical = patient_data.get('umbral_critico_cm3')
+    T_critical = DEFAULT_UMBRAL_CRITICO
     if T_critical is None: T_critical = DEFAULT_UMBRAL_CRITICO
     
     # Capacidad máxima K (solo para Gompertz)

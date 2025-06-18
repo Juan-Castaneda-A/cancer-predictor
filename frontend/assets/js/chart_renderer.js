@@ -19,10 +19,16 @@ function renderTumorGrowthChart(curvePoints, T0_for_graph, T_critical, estimated
 
     // Calcular el punto en el eje X para el tiempo estimado
     // No necesitamos findIndex, solo el punto final del tiempo estimado
+
+    let estimatedTimeValue = estimatedTime;
+    if (timeUnit === "años") {
+    estimatedTimeValue = estimatedTime * 365.25; // ✅ Convertir a días
+}
+
     let estimatedTimePoint = [];
     if (estimatedTime > 0) { // Solo añadir si hay un tiempo estimado válido
         estimatedTimePoint = [{
-            x: estimatedTime, // Usar el valor exacto del tiempo estimado
+            x: estimatedTimeValue, // Usar el valor exacto del tiempo estimado
             y: T_critical // Debe estar en el umbral crítico en ese tiempo
         }];
     }
