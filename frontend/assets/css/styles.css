@@ -250,3 +250,23 @@ footer {
         margin: 5px 10px;
     }
 }
+
+/* Añadir al final de styles.css */
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    }
+    
+    .history-table th, .history-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    }
+    
+    .history-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #333;
+    }

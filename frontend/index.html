@@ -15,7 +15,18 @@
     </header>
 
     <main>
-        <section id="introduction" class="container">
+        <section id="doctor-login-section" class="container">
+            <h2>Acceso para Profesionales de la Salud</h2>
+            <p>Ingrese su código de doctor para acceder a la herramienta de predicción.</p>
+            <div class="form-group">
+                <label for="doctor_code_input">Código de Doctor:</label>
+                <input type="password" id="doctor_code_input" placeholder="Ingrese su código aquí" required>
+            </div>
+            <button id="doctor_login_btn">Acceder</button>
+            <div id="doctor_login_error" class="error-message hidden"></div>
+        </section>
+
+        <section id="introduction" class="container hidden">
             <h2>Bienvenido/a</h2>
             <p>Explore los siguientes modelos matemáticos para estimar la progresión del tumor y el tiempo de vida hasta un umbral crítico en pacientes con cáncer de mama. Esta herramienta es de carácter **educativo y no sustituye el consejo médico profesional.**</p>
             <p>Destacamos la utilidad de las ecuaciones diferenciales en la oncología y cómo esta herramienta puede servir como apoyo académico o investigativo.</p>
@@ -31,26 +42,37 @@
             <h2>Calculadora de Predicción <span id="model-name"></span></h2>
             <form id="predictionForm">
                 <h3>1. Información del Paciente y Visita</h3>
+                
                 <div class="form-group">
-                    <label for="identificacion">ID del Paciente:</label>
-                    <input type="text" id="identificacion" name="identificacion" placeholder="Ej: P001">
+                    <label for="patient_select">Seleccionar Paciente Existente:</label>
+                    <select id="patient_select" name="patient_id">
+                        <option value="">-- Nuevo Paciente --</option>
+                        </select>
                 </div>
-                <div class="form-group">
-                    <label for="nombre_paciente">Nombre del Paciente:</label>
-                    <input type="text" id="nombre_paciente" name="nombre_paciente" placeholder="Ej: Juan Pérez">
+
+                <div id="new-patient-fields">
+                    <div class="form-group">
+                        <label for="identificacion">ID del Paciente (Único):</label>
+                        <input type="text" id="identificacion" name="identificacion" placeholder="Ej: P001" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre_paciente">Nombre del Paciente:</label>
+                        <input type="text" id="nombre_paciente" name="nombre_paciente" placeholder="Ej: Juan Pérez" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sexo">Sexo:</label>
+                        <select id="sexo" name="sexo">
+                            <option value="">Seleccione</option>
+                            <option value="femenino">Femenino</option>
+                            <option value="masculino">Masculino</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edad">Edad del Paciente:</label>
+                        <input type="number" id="edad" name="edad" min="1" max="120">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="sexo">Sexo:</label>
-                    <select id="sexo" name="sexo">
-                        <option value="">Seleccione</option>
-                        <option value="femenino">Femenino</option>
-                        <option value="masculino">Masculino</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="edad">Edad del Paciente:</label>
-                    <input type="number" id="edad" name="edad" min="1" max="120">
-                </div>
+
                 <div class="form-group">
                     <label for="current_visit_date">Fecha de la Visita Actual:</label>
                     <input type="date" id="current_visit_date" name="current_visit_date" required>
@@ -74,6 +96,8 @@
                         <label for="last_visit_date">Fecha de la Visita Anterior:</label>
                         <input type="date" id="last_visit_date" name="last_visit_date">
                     </div>
+                    <button type="button" id="load_prev_visit_data">Cargar Última Visita Registrada</button>
+                    <div id="load_prev_visit_error" class="error-message hidden"></div>
                 </div>
 
                 <h3>2. Parámetros del Tumor Actual</h3>
@@ -83,7 +107,7 @@
                 </div>
                 
                 <div class="form-group" id="r-description">
-                    <p>La **tasa de crecimiento (r)**, la **capacidad máxima del tumor (K)** y el **umbral crítico** se determinarán automáticamente por el sistema con valores bibliográficos, basados en la información proporcionada.</p>
+                    <p>La **tasa de crecimiento (r)**, la **capacidad máxima del tumor (K)** y el **umbral crítico** se determinarán automáticamente por el sistema con valores bibliográficos o personalizados (para visitas subsecuentes), basados en la información proporcionada.</p>
                 </div>
 
                 <h3>3. Factores Clínicos Adicionales (Opcional, para refinar la predicción)</h3>
@@ -184,6 +208,10 @@
                 <pre id="params-used"></pre>
                 <h4>Datos del Paciente Enviados:</h4>
                 <pre id="patient-data-sent"></pre>
+                <h3>Historial de Visitas del Paciente</h3>
+                <div id="patient-history-table">
+                    <p>No hay historial de visitas previo registrado para este paciente.</p>
+                </div>
             </div>
 
             <div class="disclaimer">
