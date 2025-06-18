@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # prediction_service.py (Este archivo será tu Blueprint)
 from flask import Blueprint, request, jsonify, abort
 from datetime import datetime
@@ -94,6 +95,9 @@ def calculate_r_from_history_gompertz(T_anterior: float, T_actual: float, time_d
 
 =======
 from models import exponential_model, gompertz_model
+=======
+from backend.models import exponential_model, gompertz_model
+>>>>>>> parent of b0541be (update backend)
 import numpy as np
 
 def get_prediction_data(model_type, T0, r, K, T_critical, other_factors):

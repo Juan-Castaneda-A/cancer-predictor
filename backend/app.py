@@ -1,7 +1,12 @@
 from flask import Flask
 from flask_cors import CORS
+<<<<<<< HEAD
 from config import Config
 from routes.predict_routes import predict_bp # Asegúrate de que prediction_service.py esté en 'routes' y se llame 'predict_routes.py'
+=======
+from backend.config import Config
+from backend.routes.predict_routes import predict_bp
+>>>>>>> parent of b0541be (update backend)
 import os
 
 app = Flask(__name__)
