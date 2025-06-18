@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from config import Config
-from routes.predict_routes import predict_bp
+from routes.predict_routes import predict_bp # Asegúrate de que prediction_service.py esté en 'routes' y se llame 'predict_routes.py'
 import os
 
 app = Flask(__name__)
@@ -12,10 +12,10 @@ CORS(app, resources={r"/api/*": {
     "origins": Config.FRONTEND_URL,
     "methods": ["GET", "POST", "OPTIONS"],
     "allow_headers": ["Content-Type"]
-}}) # Más específico si quieres
+}})
 
 # Registrar Blueprints
-app.register_blueprint(predict_bp, url_prefix='/api')
+app.register_blueprint(predict_bp, url_prefix='/api') # Esto conectará tus rutas de prediction_service.py bajo /api
 
 @app.route('/')
 def home():

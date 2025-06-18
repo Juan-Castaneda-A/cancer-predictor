@@ -1,5 +1,7 @@
 Flask
 flask-cors
+SQLAlchemy
+psycopg2-binary
 numpy
 scipy
 gunicorn

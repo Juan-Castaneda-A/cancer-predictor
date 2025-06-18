@@ -1,6 +1,6 @@
 // frontend/assets/js/main.js
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api'; // *** IMPORTANTE: Cambia esto a la URL de tu backend ***
+const API_BASE_URL = 'https://cancer-predictor-ed.onrender.com/'; // *** IMPORTANTE: Cambia esto a la URL de tu backend ***
 
 // Referencias a elementos del DOM
 const doctorLoginSection = document.getElementById('doctor-login-section');
