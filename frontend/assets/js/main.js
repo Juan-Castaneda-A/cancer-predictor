@@ -13,18 +13,30 @@ const btnGompertz = document.getElementById('btnGompertz');
 const btnCalibrate = document.getElementById('btnCalibrate'); // Deshabilitado por ahora
 
 const modelNameSpan = document.getElementById('model-name');
-const KGroup = document.getElementById('K-group');
+// KGroup ya no necesita ser una referencia directa a un input, solo al div que lo contiene (si aún se usa para estilo)
+const KGroup = document.getElementById('K-group'); // Se mantiene para ocultar el mensaje si es exponencial
 const predictionForm = document.getElementById('predictionForm');
 const calculateBtn = document.getElementById('calculate-btn');
 const loadingMessage = document.getElementById('loading-message');
 const formErrorMessage = document.getElementById('form-error-message');
 
+// Nuevas referencias para los campos de "primera visita"
+const isFirstVisitYes = document.getElementById('is_first_visit_yes');
+const isFirstVisitNo = document.getElementById('is_first_visit_no');
+const subsequentVisitFields = document.getElementById('subsequent-visit-fields');
+const rDescription = document.getElementById('r-description'); // Para mostrar/ocultar descripción de 'r', K y umbral
+
+// Nuevas referencias para mostrar los resultados detallados
 const tiempoEstimadoSpan = document.getElementById('tiempo-estimado');
 const unidadTiempoSpan = document.getElementById('unidad-tiempo');
 const intervaloConfianzaSpan = document.getElementById('intervalo-confianza');
+const currentCancerStageSpan = document.getElementById('current-cancer-stage'); 
 const interpretationText = document.getElementById('interpretation-text');
+const possibleTreatmentsText = document.getElementById('possible-treatments-text'); 
 const mathFormulaDiv = document.getElementById('math-formula');
 const paramsUsedPre = document.getElementById('params-used');
+const patientDataSentPre = document.getElementById('patient-data-sent'); 
+const disclaimerText = document.getElementById('disclaimer-text'); 
 
 const btnNewPrediction = document.getElementById('btnNewPrediction');
 const btnExportPdf = document.getElementById('btnExportPdf'); // Deshabilitado por ahora
@@ -51,27 +63,55 @@ function scrollToSection(sectionId) {
 function updateFormForModel(model) {
     selectedModel = model;
     modelNameSpan.textContent = model === 'exponencial' ? 'Exponencial' : 'Gompertz';
-    if (model === 'exponencial') {
-        KGroup.classList.add('hidden');
-        document.getElementById('K').removeAttribute('required');
-    } else { // Gompertz
-        KGroup.classList.remove('hidden');
-        document.getElementById('K').setAttribute('required', 'true');
-    }
+    
+    // La descripción de r/K/umbral siempre se muestra, ya que los valores son internos
+    rDescription.classList.remove('hidden'); 
+    
+    // El KGroup, que contenía el input K, ahora solo muestra una descripción general
+    // Para el modelo exponencial, simplemente el mensaje de K y umbral crítico aplica
+    // Para Gompertz, el backend usará K. No hay interacción directa con el input K aquí.
+
+    // Asegurarse de que los campos de visitas subsecuentes estén ocultos al seleccionar el modelo
+    // y que los campos de r bibliográfico estén visibles
+    isFirstVisitYes.checked = true; // Por defecto a "Sí, es primera visita"
+    toggleSubsequentVisitFields();
+
     showSection('prediction-form-section');
     scrollToSection('prediction-form-section');
 }
+
+function toggleSubsequentVisitFields() {
+    const isFirstVisit = isFirstVisitYes.checked;
+    if (isFirstVisit) {
+        subsequentVisitFields.classList.add('hidden');
+        // Quitar 'required' para que el formulario se pueda enviar si se cambia de "No" a "Sí"
+        document.getElementById('previous_tumor_size_cm3').removeAttribute('required');
+        document.getElementById('last_visit_date').removeAttribute('required');
+        // Limpiar valores si se ocultan
+        document.getElementById('previous_tumor_size_cm3').value = '';
+        document.getElementById('last_visit_date').value = '';
+    } else {
+        subsequentVisitFields.classList.remove('hidden');
+        // Hacer 'required' si es visita subsecuente
+        document.getElementById('previous_tumor_size_cm3').setAttribute('required', 'true');
+        document.getElementById('last_visit_date').setAttribute('required', 'true');
+    }
+    // Factores adicionales son siempre opcionales, no se tocan sus atributos 'required' aquí
+}
+
 
 function displayResults(data) {
     showSection('results-section');
     scrollToSection('results-section');
 
     tiempoEstimadoSpan.textContent = data.tiempo_estimado;
-    unidadTiempoSpan.textContent = data.unidad;
+    unidadTiempoSpan.textContent = data.unidad_tiempo; 
     intervaloConfianzaSpan.textContent = data.intervalo_confianza;
-    paramsUsedPre.textContent = JSON.stringify(data.parametros_usados, null, 2);
+    currentCancerStageSpan.textContent = data.estado_cancer_actual_t; 
 
-    interpretationText.innerHTML = `Utilizando el **Modelo ${data.modelo_usado.charAt(0).toUpperCase() + data.modelo_usado.slice(1)}** con los parámetros proporcionados, el tamaño del tumor se estima que alcanzará el umbral crítico de **${data.parametros_usados.T_critical} cm³** en aproximadamente **${data.tiempo_estimado} ${data.unidad}**.`;
+    interpretationText.innerHTML = data.interpretacion_resultado; 
+    possibleTreatmentsText.innerHTML = data.posibles_tratamientos; 
+    disclaimerText.innerHTML = data.descargo_responsabilidad; 
 
     // Renderizar la fórmula LaTeX con MathJax
     mathFormulaDiv.textContent = `$$${data.ecuacion_latex}$$`;
@@ -79,9 +119,14 @@ function displayResults(data) {
         // Callback después de MathJax, si es necesario
     }).catch((err) => console.error('MathJax rendering failed:', err));
 
+    // Mostrar los parámetros usados y los datos del paciente enviados
+    paramsUsedPre.textContent = JSON.stringify(data.parametros_usados, null, 2);
+    patientDataSentPre.textContent = JSON.stringify(data.datos_paciente_enviados, null, 2);
+
 
     // Llamar a la función de renderizado del gráfico de chart_renderer.js
-    renderTumorGrowthChart(data.puntos_curva, data.parametros_usados.T0, data.parametros_usados.T_critical);
+    // El T0 para la gráfica es el "initial_tumor_size_cm3" (tamaño actual)
+    renderTumorGrowthChart(data.puntos_curva, data.parametros_usados.T0_calculo, data.parametros_usados.T_umbral_critico, data.tiempo_estimado, data.unidad_tiempo);
 }
 
 function showLoading(show) {
@@ -103,32 +148,46 @@ function clearFormError() {
 btnExponential.addEventListener('click', () => updateFormForModel('exponencial'));
 btnGompertz.addEventListener('click', () => updateFormForModel('gompertz'));
 
+// Event listeners para los radio buttons de 'is_first_visit'
+isFirstVisitYes.addEventListener('change', toggleSubsequentVisitFields);
+isFirstVisitNo.addEventListener('change', toggleSubsequentVisitFields);
+
+
 predictionForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     clearFormError();
     showLoading(true);
 
     const formData = new FormData(predictionForm);
-    const data = {
+    const dataToSend = {
         model_type: selectedModel
     };
 
-    // Recoger todos los campos del formulario
+    // Recoger todos los campos del formulario, algunos con nombres actualizados
     for (const [key, value] of formData.entries()) {
-        if (value) { // Solo añadir si hay un valor
-            if (['T0', 'r', 'K', 'T_critical'].includes(key)) {
-                data[key] = parseFloat(value);
-            } else if (['dias_tratamiento', 'edad'].includes(key)) {
-                data[key] = parseInt(value);
+        // Convertir a booleano el is_first_visit
+        if (key === 'is_first_visit') {
+            dataToSend[key] = (value === 'true');
+        } else if (value) { // Solo añadir si hay un valor y no es un campo vacío
+            // Asegúrate de que los IDs del HTML coincidan con los esperados en el backend
+            // T0 del formulario es 'initial_tumor_size_cm3'
+            if (['initial_tumor_size_cm3', 'previous_tumor_size_cm3'].includes(key)) {
+                dataToSend[key] = parseFloat(value);
+            } else if (['edad', 'dias_tratamiento'].includes(key)) {
+                dataToSend[key] = parseInt(value);
             } else {
-                data[key] = value;
+                dataToSend[key] = value;
             }
         }
     }
-
-    // Asegurarse de que K sea null si es exponencial y no fue llenado
-    if (selectedModel === 'exponencial' && !data.K) {
-        data.K = null;
+    
+    // K_value y umbral_critico_cm3 ya no vienen del frontend, el backend los manejará.
+    // Asegurarse de que el campo K_value no se envíe si no existe o es irrelevante
+    if (dataToSend.hasOwnProperty('K_value')) {
+        delete dataToSend.K_value;
+    }
+    if (dataToSend.hasOwnProperty('umbral_critico_cm3')) {
+        delete dataToSend.umbral_critico_cm3;
     }
 
     try {
@@ -137,7 +196,7 @@ predictionForm.addEventListener('submit', async (event) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(dataToSend)
         });
 
         const result = await response.json();
@@ -149,7 +208,7 @@ predictionForm.addEventListener('submit', async (event) => {
         }
     } catch (error) {
         console.error('Error de conexión:', error);
-        displayFormError('No se pudo conectar con el servidor. Asegúrate de que el backend esté ejecutándose.');
+        displayFormError('No se pudo conectar con el servidor. Asegúrate de que el backend esté ejecutándose y la URL sea correcta.');
     } finally {
         showLoading(false);
     }
@@ -159,11 +218,18 @@ btnNewPrediction.addEventListener('click', () => {
     predictionForm.reset(); // Limpiar el formulario
     showSection('introduction'); // Volver a la sección de introducción
     scrollToSection('introduction');
-    // Reiniciar estado visual del formulario si es necesario
-    KGroup.classList.add('hidden'); 
+    // Reiniciar estado visual del formulario y campos condicionales
+    isFirstVisitYes.checked = true; // Restablecer a primera visita por defecto
+    toggleSubsequentVisitFields();
+    // Restablecer la visibilidad de la descripción de r/K/umbral
+    rDescription.classList.remove('hidden'); 
 });
 
 // Inicialización: mostrar solo la sección de introducción al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
     showSection('introduction');
+    // Asegurarse de que los campos de visita subsecuente estén ocultos al cargar la página
+    toggleSubsequentVisitFields(); 
+    // Asegurarse de que la descripción de r/K/umbral esté visible inicialmente
+    rDescription.classList.remove('hidden');
 });

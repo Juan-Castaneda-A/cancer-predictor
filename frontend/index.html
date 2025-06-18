@@ -30,39 +30,73 @@
         <section id="prediction-form-section" class="container hidden">
             <h2>Calculadora de Predicción <span id="model-name"></span></h2>
             <form id="predictionForm">
-                <h3>1. Información Básica del Paciente (Opcional)</h3>
+                <h3>1. Información del Paciente y Visita</h3>
                 <div class="form-group">
-                    <label for="nombre_paciente">Nombre/ID:</label>
-                    <input type="text" id="nombre_paciente" name="nombre_paciente">
+                    <label for="identificacion">ID del Paciente:</label>
+                    <input type="text" id="identificacion" name="identificacion" placeholder="Ej: P001">
                 </div>
+                <div class="form-group">
+                    <label for="nombre_paciente">Nombre del Paciente:</label>
+                    <input type="text" id="nombre_paciente" name="nombre_paciente" placeholder="Ej: Juan Pérez">
+                </div>
+                <div class="form-group">
+                    <label for="sexo">Sexo:</label>
+                    <select id="sexo" name="sexo">
+                        <option value="">Seleccione</option>
+                        <option value="femenino">Femenino</option>
+                        <option value="masculino">Masculino</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edad">Edad del Paciente:</label>
+                    <input type="number" id="edad" name="edad" min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="current_visit_date">Fecha de la Visita Actual:</label>
+                    <input type="date" id="current_visit_date" name="current_visit_date" required>
+                </div>
+
+                <div class="form-group">
+                    <label>¿Es la primera visita del paciente para predicción?</label>
+                    <div>
+                        <input type="radio" id="is_first_visit_yes" name="is_first_visit" value="true" checked> <label for="is_first_visit_yes">Sí</label>
+                        <input type="radio" id="is_first_visit_no" name="is_first_visit" value="false"> <label for="is_first_visit_no">No</label>
+                    </div>
+                </div>
+
+                <div id="subsequent-visit-fields" class="hidden">
+                    <h4>Datos de la Visita Anterior:</h4>
+                    <div class="form-group">
+                        <label for="previous_tumor_size_cm3">Tamaño del Tumor en la Visita Anterior (cm³):</label>
+                        <input type="number" id="previous_tumor_size_cm3" name="previous_tumor_size_cm3" step="0.01" min="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="last_visit_date">Fecha de la Visita Anterior:</label>
+                        <input type="date" id="last_visit_date" name="last_visit_date">
+                    </div>
+                </div>
+
+                <h3>2. Parámetros del Tumor Actual</h3>
+                <div class="form-group">
+                    <label for="initial_tumor_size_cm3">Tamaño del Tumor Actual (cm³):</label>
+                    <input type="number" id="initial_tumor_size_cm3" name="initial_tumor_size_cm3" step="0.01" min="0.01" required>
+                </div>
+                
+                <div class="form-group" id="r-description">
+                    <p>La **tasa de crecimiento (r)**, la **capacidad máxima del tumor (K)** y el **umbral crítico** se determinarán automáticamente por el sistema con valores bibliográficos, basados en la información proporcionada.</p>
+                </div>
+
+                <h3>3. Factores Clínicos Adicionales (Opcional, para refinar la predicción)</h3>
                 <div class="form-group">
                     <label for="fecha_diagnostico">Fecha de Diagnóstico:</label>
                     <input type="date" id="fecha_diagnostico" name="fecha_diagnostico">
                 </div>
-
-                <h3>2. Parámetros Clínicos Clave</h3>
                 <div class="form-group">
-                    <label for="T0">Tamaño Inicial del Tumor (cm³):</label>
-                    <input type="number" id="T0" name="T0" step="0.01" min="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="r">Tasa de Crecimiento (r):</label>
-                    <input type="number" id="r" name="r" step="0.001" min="0.0001" required>
-                </div>
-                <div class="form-group" id="K-group">
-                    <label for="K">Capacidad Máxima del Tumor (K, cm³):</label>
-                    <input type="number" id="K" name="K" step="0.01" min="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="T_critical">Umbral Crítico del Tumor (cm³):</label>
-                    <input type="number" id="T_critical" name="T_critical" step="0.01" min="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="dias_tratamiento">Días en Tratamiento (opcional):</label>
+                    <label for="dias_tratamiento">Días en Tratamiento (si aplica):</label>
                     <input type="number" id="dias_tratamiento" name="dias_tratamiento" min="0">
                 </div>
                 <div class="form-group">
-                    <label for="estadio">Etapa del Cáncer (AJCC):</label>
+                    <label for="estadio">Estadio del Cáncer (AJCC):</label>
                     <select id="estadio" name="estadio">
                         <option value="">Seleccione</option>
                         <option value="I">Etapa I</option>
@@ -71,8 +105,15 @@
                         <option value="IV">Etapa IV</option>
                     </select>
                 </div>
-
-                <h3>3. Otros Factores (Opcional)</h3>
+                <div class="form-group">
+                    <label for="grado_histopatologico">Grado Histopatológico:</label>
+                    <select id="grado_histopatologico" name="grado_histopatologico">
+                        <option value="">Seleccione</option>
+                        <option value="Grado 1">Grado 1</option>
+                        <option value="Grado 2">Grado 2</option>
+                        <option value="Grado 3">Grado 3</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label>Receptores Hormonales (ER/PR):</label>
                     <div>
@@ -82,9 +123,14 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="tipo_cancer">Tipo de Cáncer:</label>
+                    <label for="tipo_cancer">Subtipo Molecular/Tipo de Cáncer:</label>
                     <select id="tipo_cancer" name="tipo_cancer">
                         <option value="">Seleccione</option>
+                        <option value="Triple Negativo">Triple Negativo</option>
+                        <option value="HER2-positivo">HER2-positivo</option>
+                        <option value="ER-positivo">ER-positivo</option>
+                        <option value="No-luminal">No-luminal</option>
+                        <option value="Luminal">Luminal</option>
                         <option value="Ductal Invasivo">Ductal Invasivo</option>
                         <option value="Lobulillar Invasivo">Lobulillar Invasivo</option>
                         <option value="Medular">Medular</option>
@@ -99,10 +145,6 @@
                         <input type="radio" id="her2_neg" name="her2" value="negativo"> <label for="her2_neg">Negativo</label>
                         <input type="radio" id="her2_desc" name="her2" value="desconocido" checked> <label for="her2_desc">Desconocido</label>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="edad">Edad del Paciente:</label>
-                    <input type="number" id="edad" name="edad" min="1" max="120">
                 </div>
                 <div class="form-group">
                     <label for="metastasis">Historial de Metástasis:</label>
@@ -133,17 +175,20 @@
             
             <div class="interpretation">
                 <h3>Interpretación del Modelo y Datos</h3>
+                <p>Etapa del Cáncer (según tamaño actual): <strong id="current-cancer-stage">--</strong></p>
                 <p id="interpretation-text"></p>
+                <p id="possible-treatments-text"></p>
                 <h4>Fórmula Matemática Utilizada:</h4>
                 <p class="math-formula" id="math-formula"></p>
-                <h4>Parámetros Usados:</h4>
+                <h4>Parámetros Usados en el Cálculo:</h4>
                 <pre id="params-used"></pre>
+                <h4>Datos del Paciente Enviados:</h4>
+                <pre id="patient-data-sent"></pre>
             </div>
 
             <div class="disclaimer">
                 <h3>Importante: Descargo de Responsabilidad Médico</h3>
-                <p>Este modelo es una **simulación matemática con fines educativos y académicos únicamente.** No está diseñado para ser una herramienta de diagnóstico, pronóstico o tratamiento médico. Las predicciones se basan en modelos simplificados y no consideran todas las complejidades biológicas individuales de cada paciente.</p>
-                <p><strong>Bajo ninguna circunstancia debe utilizar esta herramienta para tomar decisiones sobre su salud o la de otros.</strong> Siempre consulte a un profesional médico calificado para cualquier problema de salud, diagnóstico o plan de tratamiento.</p>
+                <p id="disclaimer-text"></p>
             </div>
 
             <div class="actions">

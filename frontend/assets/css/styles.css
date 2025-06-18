@@ -90,6 +90,18 @@ p {
 .form-group input[type="radio"] {
     margin-right: 5px;
 }
+/* Nuevo estilo para los contenedores de radio buttons si quieres más espaciado */
+.form-group > div { 
+    display: flex;
+    gap: 15px; /* Espacio entre los radio buttons */
+    flex-wrap: wrap; /* Para que se adapten a pantallas pequeñas */
+}
+.form-group > div label {
+    font-weight: normal; /* Las etiquetas de los radios no necesitan ser tan bold */
+    display: inline-block; /* Para que la etiqueta esté al lado del radio */
+    margin-bottom: 0;
+}
+
 
 #calculate-btn {
     background-color: #ff0055; /* Azul para el botón de cálculo */
@@ -164,6 +176,8 @@ pre {
     border-radius: 5px;
     overflow-x: auto;
     font-family: 'Courier New', monospace;
+    white-space: pre-wrap; /* Para que el texto se ajuste si es muy largo */
+    word-wrap: break-word; /* Asegura que palabras largas se rompan */
 }
 
 .disclaimer {
