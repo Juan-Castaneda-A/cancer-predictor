@@ -34,13 +34,13 @@ DEFAULT_R_BIBLIOGRAFICO = BIBLIOGRAPHIC_R_VALUES["General_Media"]
 
 # Ejemplo de K para Gompertz (cm^3)
 # Usaremos un valor en el rango de modelos matemáticos (0.08 a 11 cm^3)
-DEFAULT_K_GOMPERTZ = 5.0 # cm^3. Ajusta este valor si deseas otro dentro del rango.
+DEFAULT_K_GOMPERTZ = 20.733 # cm^3. Ajusta este valor si deseas otro dentro del rango.
 
 # Umbral Crítico por defecto (cm^3) para el cálculo del tiempo de vida.
 # Como la profesora lo dio de ejemplo, podemos mantener 15 cm^3 o usar algo como 
 # el límite superior de los 'volúmenes tumorales observados' de tu tabla.
 # Por ejemplo, podemos usar el Tv2 (T=5cm de diámetro) que es 20.733 cm^3
-DEFAULT_UMBRAL_CRITICO = 20.733 # cm^3, basado en T=5cm de tu tabla K4 (Tv2)
+DEFAULT_UMBRAL_CRITICO = 5.0 # cm^3, basado en T=5cm de tu tabla K4 (Tv2)
 
 # --- Funciones Auxiliares ---
 

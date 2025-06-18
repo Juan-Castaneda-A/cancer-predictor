@@ -89,7 +89,7 @@ function renderTumorGrowthChart(curvePoints, T0_for_graph, T_critical, estimated
                 x: {
                     title: {
                         display: true,
-                        text: `Tiempo (${timeUnit === 'días' ? 'días' : 'años'})` 
+                        text: `Tiempo (días)` 
                     },
                     beginAtZero: true,
                     // Asegurarse de que el eje X abarque hasta el tiempo estimado + un margen
