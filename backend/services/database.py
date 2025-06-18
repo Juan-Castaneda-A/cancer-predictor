@@ -7,7 +7,7 @@ import os
 
 # Define el motor de la base de datos SQLite por defecto.
 # En Render, usaremos una variable de entorno DATABASE_URL para PostgreSQL.
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cancer_predictor.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://cancer_mama_user:tNPnmF157Oht5CxbLr6LiH4s9p4VBG9R@dpg-d19h65ripnbc73ekptc0-a.oregon-postgres.render.com/cancer_mama")
 
 engine = create_engine(DATABASE_URL)
 Base = declarative_base()
