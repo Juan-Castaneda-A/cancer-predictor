@@ -10,10 +10,9 @@ def predict():
     model_type = data.get('model_type')
     T0 = data.get('T0')
     r = data.get('r')
-    K = data.get('K') # Podría ser None para exponencial
+    K = data.get('K')
     T_critical = data.get('T_critical')
     
-    # Otros factores
     other_factors = {
         'nombre_paciente': data.get('nombre_paciente'),
         'fecha_diagnostico': data.get('fecha_diagnostico'),
@@ -26,7 +25,6 @@ def predict():
         'metastasis': data.get('metastasis')
     }
 
-    # Convertir a float/int si es necesario y manejar None
     try:
         T0 = float(T0)
         r = float(r)

@@ -13,10 +13,8 @@ def get_prediction_data(model_type, T0, r, K, T_critical, other_factors):
     model_equation_latex = "" # Para mostrar la ecuación en el frontend
 
     try:
-        # Asumiendo una influencia heurística simple de otros factores en 'r' o 'K'
-        # Esto es un placeholder para una lógica más compleja
         adjusted_r = float(r)
-        adjusted_K = float(K) if K is not None else None # K puede ser None para exponencial
+        adjusted_K = float(K) if K is not None else None 
 
         if other_factors.get('estadio') == 'IV':
             adjusted_r *= 1.2 # Asumiendo cáncer en etapa IV es más agresivo
@@ -29,7 +27,6 @@ def get_prediction_data(model_type, T0, r, K, T_critical, other_factors):
         if other_factors.get('edad') and int(other_factors['edad']) > 70:
             adjusted_r *= 0.9 # Podría ser un crecimiento más lento en pacientes mayores
 
-        # Validación básica para evitar cálculos con valores no válidos
         if not (isinstance(T0, (int, float)) and T0 > 0 and
                 isinstance(adjusted_r, (int, float)) and adjusted_r > 0 and
                 isinstance(T_critical, (int, float)) and T_critical > 0):
@@ -46,7 +43,6 @@ def get_prediction_data(model_type, T0, r, K, T_critical, other_factors):
             if adjusted_K is None or not (isinstance(adjusted_K, (int, float)) and adjusted_K > 0):
                 raise ValueError("K (Capacidad Máxima) es requerido y debe ser positivo para el modelo de Gompertz.")
             
-            # Asegurarse que T0 < T_critical < K para el cálculo de Gompertz sea significativo
             if not (T0 < T_critical < adjusted_K):
                 raise ValueError("Para el modelo de Gompertz, se requiere T0 < Umbral Crítico < K (Capacidad Máxima).")
 
@@ -58,8 +54,6 @@ def get_prediction_data(model_type, T0, r, K, T_critical, other_factors):
         else:
             raise ValueError("Tipo de modelo no reconocido.")
 
-        # Convertir el tiempo estimado a años si es un valor significativo en días
-        # Asumiendo que el cálculo de tiempo_estimated se da en días
         time_unit = "días"
         if time_estimated > 365:
             time_estimated /= 365.25
@@ -67,7 +61,6 @@ def get_prediction_data(model_type, T0, r, K, T_critical, other_factors):
             upper_bound /= 365.25
             time_unit = "años"
         
-        # Redondear resultados
         time_estimated = round(time_estimated, 2)
         lower_bound = round(lower_bound, 2)
         upper_bound = round(upper_bound, 2)
@@ -84,7 +77,7 @@ def get_prediction_data(model_type, T0, r, K, T_critical, other_factors):
                 "r": adjusted_r,
                 "K": adjusted_K,
                 "T_critical": T_critical,
-                **other_factors # Incluir los otros factores para referencia
+                **other_factors
             }
         }, 200
     except ValueError as e:

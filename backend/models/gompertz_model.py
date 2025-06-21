@@ -7,8 +7,7 @@ def calculate_tumor_size_gompertz(T0, r, K, t):
     """
     if K <= 0 or T0 <= 0:
         raise ValueError("K y T0 deben ser mayores que cero para Gompertz.")
-    
-    # Asegurarse de que T0 < K para un crecimiento sigmoidal esperado
+
     if T0 >= K:
         # Manejar caso donde el tumor inicial es mayor o igual a la capacidad máxima
         # Podrías devolver K, o indicar que ya está en su límite
@@ -41,7 +40,7 @@ def calculate_time_to_threshold_gompertz(T0, r, K, T_critical):
     num_term = np.log(T_critical / K)
     den_term = np.log(T0 / K)
     
-    if den_term == 0: # Evitar división por cero si T0 == K
+    if den_term == 0:
         raise ValueError("T0 no puede ser igual a K para el cálculo de Gompertz.")
 
     try:
@@ -49,7 +48,6 @@ def calculate_time_to_threshold_gompertz(T0, r, K, T_critical):
         time = -(1 / r) * log_ratio
         return time
     except ValueError:
-        # Esto ocurre si num_term / den_term es negativo o cero (ej. T_critical/K es inválido)
         raise ValueError("No se puede calcular el tiempo para Gompertz con estos parámetros. "
                          "Asegúrese que T0 < T_critical < K.")
 
@@ -59,17 +57,14 @@ def generate_gompertz_curve_points(T0, r, K, max_time_points=100, max_time_limit
     Genera puntos para graficar la curva de crecimiento de Gompertz.
     """
     if max_time_limit is None:
-        # Calcular un tiempo razonable para la curva
-        # Podría ser el tiempo para alcanzar el 95% de K o un valor fijo
         if r > 0 and K > T0:
-            # Estimar el tiempo para acercarse a K (ej. hasta el 95% de K)
             try:
                 time_to_near_K = -np.log(np.log(0.95) / np.log(T0 / K)) / r
-                max_time_limit = time_to_near_K * 1.5 if time_to_near_K > 0 else 365 * 15 # 1.5 veces ese tiempo o 15 años
+                max_time_limit = time_to_near_K * 1.5 if time_to_near_K > 0 else 365 * 15
             except Exception:
-                 max_time_limit = 365 * 15 # Fallback: 15 años en días
+                 max_time_limit = 365 * 15
         else:
-            max_time_limit = 365 * 15 # Fallback: 15 años en días
+            max_time_limit = 365 * 15
 
 
     times = np.linspace(0, max_time_limit, max_time_points)
@@ -77,7 +72,6 @@ def generate_gompertz_curve_points(T0, r, K, max_time_points=100, max_time_limit
     
     return [{"x": float(t), "y": float(s)} for t, s in zip(times, sizes)]
 
-# Puedes añadir una función simple para un intervalo de confianza heurístico si lo necesitas más adelante
 def calculate_confidence_interval_gompertz(time_estimated):
     # Esto es solo un ejemplo heurístico, NO es un cálculo estadístico riguroso
     margin = time_estimated * 0.15 # +/- 15% (un poco más que exponencial por más complejidad)

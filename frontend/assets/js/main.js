@@ -1,6 +1,4 @@
-// frontend/assets/js/main.js
-
-const API_BASE_URL = 'https://cancer-predictor-ed.onrender.com/api'; // Asegúrate que esta URL coincida con tu backend
+const API_BASE_URL = 'https://cancer-predictor-ed.onrender.com/api'; //backend
 
 // Referencias a elementos del DOM
 const introductionSection = document.getElementById('introduction');
@@ -76,11 +74,8 @@ function displayResults(data) {
     // Renderizar la fórmula LaTeX con MathJax
     mathFormulaDiv.textContent = `$$${data.ecuacion_latex}$$`;
     MathJax.typesetPromise([mathFormulaDiv]).then(() => {
-        // Callback después de MathJax, si es necesario
     }).catch((err) => console.error('MathJax rendering failed:', err));
 
-
-    // Llamar a la función de renderizado del gráfico de chart_renderer.js
     renderTumorGrowthChart(data.puntos_curva, data.parametros_usados.T0, data.parametros_usados.T_critical);
 }
 
@@ -113,9 +108,8 @@ predictionForm.addEventListener('submit', async (event) => {
         model_type: selectedModel
     };
 
-    // Recoger todos los campos del formulario
     for (const [key, value] of formData.entries()) {
-        if (value) { // Solo añadir si hay un valor
+        if (value) {
             if (['T0', 'r', 'K', 'T_critical'].includes(key)) {
                 data[key] = parseFloat(value);
             } else if (['dias_tratamiento', 'edad'].includes(key)) {
@@ -126,7 +120,6 @@ predictionForm.addEventListener('submit', async (event) => {
         }
     }
 
-    // Asegurarse de que K sea null si es exponencial y no fue llenado
     if (selectedModel === 'exponencial' && !data.K) {
         data.K = null;
     }
@@ -156,14 +149,12 @@ predictionForm.addEventListener('submit', async (event) => {
 });
 
 btnNewPrediction.addEventListener('click', () => {
-    predictionForm.reset(); // Limpiar el formulario
-    showSection('introduction'); // Volver a la sección de introducción
+    predictionForm.reset(); 
+    showSection('introduction'); 
     scrollToSection('introduction');
-    // Reiniciar estado visual del formulario si es necesario
     KGroup.classList.add('hidden'); 
 });
 
-// Inicialización: mostrar solo la sección de introducción al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
     showSection('introduction');
 });
