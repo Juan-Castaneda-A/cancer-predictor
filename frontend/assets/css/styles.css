@@ -131,11 +131,56 @@ p {
     font-weight: bold;
 }
 
+/* En frontend/assets/css/styles.css */
+
 .chart-container {
     position: relative;
     width: 100%;
-    height: 400px; /* Altura fija para el gráfico */
-    margin: 25px 0;
+    height: 400px; /* Ajusta la altura según tus preferencias */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Opcional: Estilos para los mensajes de estado/notas */
+.status-message {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #0056b3; /* Un color azul para mensajes importantes */
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.model-notes {
+    font-style: italic;
+    color: #555;
+    margin-top: 5px;
+}
+
+/* Estilos para los nuevos divs de info */
+.info-box {
+    background-color: #e9f5ff;
+    border-left: 5px solid #007bff;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.model-result-box {
+    background-color: #f0f8ff;
+    border: 1px solid #cceeff;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 4px;
 }
 
 .interpretation {
