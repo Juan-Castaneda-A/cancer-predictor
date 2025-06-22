@@ -30,89 +30,95 @@
         <section id="prediction-form-section" class="container hidden">
             <h2>Calculadora de Predicción <span id="model-name"></span></h2>
             <form id="predictionForm">
-                <h3>1. Información Básica del Paciente (Opcional)</h3>
+                <h3>1. Datos del Paciente y Medición Actual</h3>
                 <div class="form-group">
-                    <label for="nombre_paciente">Nombre/ID:</label>
-                    <input type="text" id="nombre_paciente" name="nombre_paciente">
-                </div>
-                <div class="form-group">
-                    <label for="fecha_diagnostico">Fecha de Diagnóstico:</label>
-                    <input type="date" id="fecha_diagnostico" name="fecha_diagnostico">
-                </div>
-
-                <h3>2. Parámetros Clínicos Clave</h3>
-                <div class="form-group">
-                    <label for="T0">Tamaño Inicial del Tumor (cm³):</label>
-                    <input type="number" id="T0" name="T0" step="0.01" min="0.01" required>
+                    <label for="identification_number">Número de Identificación Único:</label>
+                    <input type="text" id="identification_number" name="identification_number" required placeholder="Ej: P001-2024">
+                    <small>Identificador único para este paciente. Se usará para recuperar mediciones anteriores.</small>
                 </div>
                 <div class="form-group">
-                    <label for="r">Tasa de Crecimiento (r):</label>
-                    <input type="number" id="r" name="r" step="0.001" min="0.0001" required>
-                </div>
-                <div class="form-group" id="K-group">
-                    <label for="K">Capacidad Máxima del Tumor (K, cm³):</label>
-                    <input type="number" id="K" name="K" step="0.01" min="0.01">
+                    <label for="current_tumor_size">Tamaño Actual del Tumor (cm³):</label>
+                    <input type="number" id="current_tumor_size" name="current_tumor_size" step="0.01" min="0.01" required placeholder="Ej: 5.23">
+                    <small>Tamaño del tumor en la medición más reciente.</small>
                 </div>
                 <div class="form-group">
-                    <label for="T_critical">Umbral Crítico del Tumor (cm³):</label>
-                    <input type="number" id="T_critical" name="T_critical" step="0.01" min="0.01" required>
+                    <label for="current_measurement_date">Fecha de Medición Actual:</label>
+                    <input type="date" id="current_measurement_date" name="current_measurement_date" required>
+                    <small>Fecha en la que se tomó la medición actual del tumor.</small>
                 </div>
                 <div class="form-group">
-                    <label for="dias_tratamiento">Días en Tratamiento (opcional):</label>
-                    <input type="number" id="dias_tratamiento" name="dias_tratamiento" min="0">
+                    <label for="T_critical">Umbral Crítico (cm³):</label>
+                    <input type="number" id="T_critical" name="T_critical" step="0.01" min="0.1" value="10.0" required placeholder="Ej: 10.0">
+                    <small>Tamaño del tumor que se considera crítico.</small>
+                </div>
+                
+                <h4>Para Pacientes Nuevos (Opcional si ya existe el ID):</h4>
+                <div class="form-group">
+                    <label for="patient_name">Nombre del Paciente:</label>
+                    <input type="text" id="patient_name" name="name" placeholder="Nombre completo">
+                    <small>Solo requerido para la primera medición de un paciente nuevo.</small>
                 </div>
                 <div class="form-group">
-                    <label for="estadio">Etapa del Cáncer (AJCC):</label>
-                    <select id="estadio" name="estadio">
-                        <option value="">Seleccione</option>
-                        <option value="I">Etapa I</option>
-                        <option value="II">Etapa II</option>
-                        <option value="III">Etapa III</option>
-                        <option value="IV">Etapa IV</option>
-                    </select>
+                    <label for="date_of_birth">Fecha de Nacimiento:</label>
+                    <input type="date" id="date_of_birth" name="date_of_birth">
+                    <small>Solo requerido para la primera medición de un paciente nuevo.</small>
                 </div>
-
-                <h3>3. Otros Factores (Opcional)</h3>
-                <div class="form-group">
-                    <label>Receptores Hormonales (ER/PR):</label>
-                    <div>
-                        <input type="radio" id="er_pr_pos" name="er_pr" value="positivo"> <label for="er_pr_pos">Positivo</label>
-                        <input type="radio" id="er_pr_neg" name="er_pr" value="negativo"> <label for="er_pr_neg">Negativo</label>
-                        <input type="radio" id="er_pr_desc" name="er_pr" value="desconocido" checked> <label for="er_pr_desc">Desconocido</label>
-                    </div>
-                </div>
+        
+                <h3>2. Factores Adicionales del Cáncer (Opcional para Refinar Modelo)</h3>
                 <div class="form-group">
                     <label for="tipo_cancer">Tipo de Cáncer:</label>
                     <select id="tipo_cancer" name="tipo_cancer">
+                        <option value="Cáncer de Mama" selected>Cáncer de Mama</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="subtipo_molecular">Subtipo Molecular:</label>
+                    <select id="subtipo_molecular" name="subtipo_molecular">
                         <option value="">Seleccione</option>
-                        <option value="Ductal Invasivo">Ductal Invasivo</option>
-                        <option value="Lobulillar Invasivo">Lobulillar Invasivo</option>
-                        <option value="Medular">Medular</option>
-                        <option value="Mucinoso">Mucinoso</option>
-                        <option value="Otros">Otros</option>
+                        <option value="Triple Negativo">Triple Negativo</option>
+                        <option value="HER2-positivo">HER2-positivo</option>
+                        <option value="ER-positivo">ER-positivo</option>
+                        <option value="Luminal">Luminal</option>
+                        <option value="No-luminal">No-luminal</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Estado HER2:</label>
-                    <div>
-                        <input type="radio" id="her2_pos" name="her2" value="positivo"> <label for="her2_pos">Positivo</label>
-                        <input type="radio" id="her2_neg" name="her2" value="negativo"> <label for="her2_neg">Negativo</label>
-                        <input type="radio" id="her2_desc" name="her2" value="desconocido" checked> <label for="her2_desc">Desconocido</label>
-                    </div>
+                    <label for="grado_histopatologico">Grado Histopatológico:</label>
+                    <select id="grado_histopatologico" name="grado_histopatologico">
+                        <option value="">Seleccione</option>
+                        <option value="Grado 1">Grado 1</option>
+                        <option value="Grado 2">Grado 2</option>
+                        <option value="Grado 3">Grado 3</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="edad">Edad del Paciente:</label>
-                    <input type="number" id="edad" name="edad" min="1" max="120">
+                    <label for="er_pr">Estado ER/PR:</label>
+                    <select id="er_pr" name="er_pr">
+                        <option value="">Seleccione</option>
+                        <option value="Positivo">Positivo</option>
+                        <option value="Negativo">Negativo</option>
+                        <option value="Desconocido">Desconocido</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="metastasis">Historial de Metástasis:</label>
+                    <label for="her2">Estado HER2:</label>
+                    <select id="her2" name="her2">
+                        <option value="">Seleccione</option>
+                        <option value="Positivo">Positivo</option>
+                        <option value="Negativo">Negativo</option>
+                        <option value="Desconocido">Desconocido</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="metastasis">Presencia de Metástasis:</label>
                     <select id="metastasis" name="metastasis">
-                        <option value="no">No</option>
-                        <option value="si">Sí</option>
-                        <option value="desconocido">Desconocido</option>
+                        <option value="">Seleccione</option>
+                        <option value="Si">Si</option>
+                        <option value="No">No</option>
+                        <option value="Desconocido">Desconocido</option>
                     </select>
                 </div>
-
+        
                 <button type="submit" id="calculate-btn">Calcular Predicción</button>
                 <div id="loading-message" class="loading-spinner hidden">Calculando...</div>
                 <div id="form-error-message" class="error-message hidden"></div>
@@ -121,31 +127,58 @@
 
         <section id="results-section" class="container hidden">
             <h2>Resultados de la Predicción</h2>
-            <div id="main-result">
-                Tiempo estimado para alcanzar el umbral crítico: <strong id="tiempo-estimado">--</strong> <span id="unidad-tiempo"></span>
-                <br>
-                Intervalo de confianza: <span id="intervalo-confianza">--</span>
+        
+            <p id="prediction-status-message" class="status-message"></p>
+        
+            <div id="patient-info-display" class="info-box hidden">
+                </div>
+        
+            <div id="parameters-used-container" class="info-box hidden">
+                <h3>Parámetros Utilizados para la Predicción</h3>
+                <p id="params-general-message"></p>
+                <ul>
+                    <li><strong>Tamaño Inicial ($T_0$):</strong> <span id="params-T0">--</span></li>
+                    <li><strong>Umbral Crítico ($T_{critical}$):</strong> <span id="params-Tcritical">--</span></li>
+                    <li><strong>Tasa de Crecimiento Final ($r_{final}$):</strong> <span id="params-r-final">--</span></li>
+                    <li><strong>Capacidad Máxima ($K_{final}$):</strong> <span id="params-K-final">--</span></li>
+                    <li><strong>Tasa Empírica Calculada ($r_{empírica}$):</strong> <span id="params-r-empirical">--</span></li>
+                    <li><strong>Tasa Bibliográfica Base ($r_{bibliográfica}$):</strong> <span id="params-r-bibliographic">--</span></li>
+                    <li><strong>Capacidad Bibliográfica Base ($K_{bibliográfica}$):</strong> <span id="params-K-bibliographic">--</span></li>
+                </ul>
             </div>
-
+        
+            <div id="model-results-section" class="info-box hidden">
+                <h3>Resultados por Modelo</h3>
+        
+                <div id="exponential-results" class="model-result-box hidden">
+                    <h4>Modelo Exponencial</h4>
+                    <p>Tiempo estimado para alcanzar el umbral crítico: <strong id="exp-tiempo-estimado">--</strong> <span id="exp-unidad-tiempo"></span></p>
+                    <p>Intervalo de confianza: <span id="exp-intervalo-confianza">--</span></p>
+                    <p id="exp-notes" class="model-notes"></p>
+                    <h5>Fórmula Matemática Utilizada:</h5>
+                    <p class="math-formula" id="exp-math-formula"></p>
+                    </div>
+        
+                <div id="gompertz-results" class="model-result-box hidden">
+                    <h4>Modelo de Gompertz</h4>
+                    <p>Tiempo estimado para alcanzar el umbral crítico: <strong id="gom-tiempo-estimado">--</strong> <span id="gom-unidad-tiempo"></span></p>
+                    <p>Intervalo de confianza: <span id="gom-intervalo-confianza">--</span></p>
+                    <p id="gom-notes" class="model-notes"></p>
+                    <h5>Fórmula Matemática Utilizada:</h5>
+                    <p class="math-formula" id="gom-math-formula"></p>
+                    </div>
+            </div>
+        
             <div class="chart-container">
                 <canvas id="tumorGrowthChart"></canvas>
             </div>
             
-            <div class="interpretation">
-                <h3>Interpretación del Modelo y Datos</h3>
-                <p id="interpretation-text"></p>
-                <h4>Fórmula Matemática Utilizada:</h4>
-                <p class="math-formula" id="math-formula"></p>
-                <h4>Parámetros Usados:</h4>
-                <pre id="params-used"></pre>
-            </div>
-
             <div class="disclaimer">
                 <h3>Importante: Descargo de Responsabilidad Médico</h3>
                 <p>Este modelo es una **simulación matemática con fines educativos y académicos únicamente.** No está diseñado para ser una herramienta de diagnóstico, pronóstico o tratamiento médico. Las predicciones se basan en modelos simplificados y no consideran todas las complejidades biológicas individuales de cada paciente.</p>
                 <p><strong>Bajo ninguna circunstancia debe utilizar esta herramienta para tomar decisiones sobre su salud o la de otros.</strong> Siempre consulte a un profesional médico calificado para cualquier problema de salud, diagnóstico o plan de tratamiento.</p>
             </div>
-
+        
             <div class="actions">
                 <button id="btnNewPrediction">Nueva Predicción</button>
                 <button id="btnExportPdf" disabled>Exportar a PDF (Próximamente)</button>
