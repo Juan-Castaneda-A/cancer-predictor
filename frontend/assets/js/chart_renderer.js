@@ -1,78 +1,121 @@
-let tumorGrowthChartInstance = null;
+// frontend/assets/js/chart_renderer.js
 
-function renderTumorGrowthChart(curvePoints, T0, T_critical) {
+let tumorGrowthChartInstance = null; // Mantener una referencia a la instancia del gráfico
+
+/**
+ * Renderiza o actualiza el gráfico de crecimiento tumoral con Chart.js.
+ * Ahora acepta los datos de ambos modelos (Exponencial y Gompertz)
+ * y los parámetros necesarios para las líneas de referencia.
+ * @param {Array<Array<number>>} exponentialCurveData - Array de [días, tamaño] para el modelo exponencial.
+ * @param {Array<Array<number>>} gompertzCurveData - Array de [días, tamaño] para el modelo de Gompertz.
+ * @param {number} T0_value - Tamaño inicial del tumor para la línea base.
+ * @param {number} T_critical_value - Umbral crítico del tumor para la línea de referencia.
+ */
+function renderTumorGrowthChart(exponentialCurveData, gompertzCurveData, T0_value, T_critical_value) {
     const ctx = document.getElementById('tumorGrowthChart').getContext('2d');
 
-    const labels = curvePoints.map(p => p.x.toFixed(0));
-    const dataPoints = curvePoints.map(p => p.y); // 
-
-    const initialTumorLine = Array(labels.length).fill(T0);
-    const criticalThresholdLine = Array(labels.length).fill(T_critical);
-
+    // Destruir la instancia anterior del gráfico si existe
     if (tumorGrowthChartInstance) {
         tumorGrowthChartInstance.destroy();
     }
 
+    const datasets = [];
+
+    // Datos para el modelo Exponencial
+    if (exponentialCurveData && exponentialCurveData.length > 0) {
+        datasets.push({
+            label: 'Modelo Exponencial',
+            data: exponentialCurveData.map(point => ({ x: point[0], y: point[1] })),
+            borderColor: 'rgb(75, 192, 192)',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0 // No mostrar puntos individuales
+        });
+    }
+
+    // Datos para el modelo Gompertz
+    if (gompertzCurveData && gompertzCurveData.length > 0) {
+        datasets.push({
+            label: 'Modelo Gompertz',
+            data: gompertzCurveData.map(point => ({ x: point[0], y: point[1] })),
+            borderColor: 'rgb(255, 99, 132)',
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 0 // No mostrar puntos individuales
+        });
+    }
+
+    // Añadir línea para el Tamaño Inicial (T0)
+    datasets.push({
+        label: 'Tamaño Inicial (T0)',
+        data: [{ x: 0, y: T0_value }], // Sólo un punto para la etiqueta
+        borderColor: 'rgb(54, 162, 235)',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        fill: false,
+        pointRadius: 5,
+        pointBackgroundColor: 'rgb(54, 162, 235)',
+        type: 'scatter' // Usar tipo scatter para que no intente dibujar una línea entre T0 y T_critical
+    });
+
+    // Añadir línea para el Umbral Crítico (T_critical)
+    // Se extiende horizontalmente a través de todo el rango X del gráfico
+    const maxDays = Math.max(
+        ...(exponentialCurveData || []).map(point => point[0]),
+        ...(gompertzCurveData || []).map(point => point[0]),
+        100 // Un valor mínimo para que la línea se vea si las curvas son cortas
+    );
+
+    datasets.push({
+        label: 'Umbral Crítico',
+        data: [{ x: 0, y: T_critical_value }, { x: maxDays, y: T_critical_value }],
+        borderColor: 'rgb(255, 159, 64)',
+        borderWidth: 2,
+        borderDash: [5, 5],
+        fill: false,
+        pointRadius: 0
+    });
+
     tumorGrowthChartInstance = new Chart(ctx, {
-        type: 'line',
+        type: 'line', // Tipo de gráfico principal
         data: {
-            labels: labels,
-            datasets: [{
-                label: 'Tamaño del Tumor (cm³)',
-                data: dataPoints,
-                borderColor: '#007bff', //Color principal de la curva
-                backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                borderWidth: 2,
-                pointRadius: 0, //No mostrar puntos individuales
-                fill: false,
-                tension: 0.1
-            },
-            {
-                label: 'Tamaño Inicial',
-                data: initialTumorLine,
-                borderColor: 'rgba(255, 193, 7, 0.7)', //Amarillo
-                borderDash: [5, 5],
-                borderWidth: 1,
-                pointRadius: 0,
-                fill: false
-            },
-            {
-                label: 'Umbral Crítico',
-                data: criticalThresholdLine,
-                borderColor: 'rgba(220, 53, 69, 0.7)', //ojo
-                borderDash: [5, 5],
-                borderWidth: 1,
-                pointRadius: 0,
-                fill: false
-            }]
+            datasets: datasets
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: false, // Permite que el gráfico ajuste su tamaño al contenedor
             scales: {
                 x: {
+                    type: 'linear',
+                    position: 'bottom',
                     title: {
                         display: true,
-                        text: 'Tiempo (días)'
-                    }
+                        text: 'Días desde la Medición Actual'
+                    },
+                    min: 0 // Asegura que el eje X empiece en 0
                 },
                 y: {
                     title: {
                         display: true,
                         text: 'Tamaño del Tumor (cm³)'
                     },
-                    beginAtZero: true,
-                    suggestedMax: Math.max(T_critical * 1.2, T0 * 2) 
+                    min: 0 // Asegura que el eje Y empiece en 0
                 }
             },
             plugins: {
                 tooltip: {
-                    mode: 'index',
-                    intersect: false
-                },
-                legend: {
-                    display: true,
-                    position: 'top'
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(2) + ' cm³';
+                            }
+                            return label;
+                        }
+                    }
                 }
             }
         }

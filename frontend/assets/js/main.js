@@ -205,6 +205,29 @@ function displayResults(data) {
         modelResultsSection.classList.add('hidden');
     }
 
+    // **AHORA, LA LLAMADA A RENDERIZAR EL GRÁFICO**
+    // Asegúrate de que los datos de la curva existan y sean válidos
+    const expCurve = data.model_results?.exponential?.curve_data || [];
+    const gomCurve = data.model_results?.gompertz?.curve_data || [];
+    const t0 = data.parameters_used_for_prediction?.T0_for_models;
+    const tCritical = data.parameters_used_for_prediction?.T_critical;
+
+    // Solo renderiza el gráfico si hay datos de al menos una curva y los parámetros son válidos
+    if ((expCurve.length > 0 || gomCurve.length > 0) && t0 !== null && tCritical !== null) {
+        renderTumorGrowthChart(expCurve, gomCurve, t0, tCritical);
+    } else {
+        // Si no hay datos para el gráfico (ej. regresión sin puntos de crecimiento), destruye el gráfico existente
+        if (tumorGrowthChartInstance) {
+            tumorGrowthChartInstance.destroy();
+            tumorGrowthChartInstance = null; // Reiniciar la instancia
+        }
+        // Puedes añadir un mensaje en la UI para indicar que no hay gráfico si es un caso de regresión pura
+        console.warn("No hay datos de curva disponibles para renderizar el gráfico o parámetros faltantes.");
+    }
+
+    // Aquí ya no necesitas las líneas antiguas:
+    // renderTumorGrowthChart(data.puntos_curva, data.parametros_usados.T0, data.parametros_usados.T_critical);
+
     // Ocultar los elementos antiguos que ya no se usan
     tiempoEstimadoSpan.textContent = '--'; // Vacía los antiguos
     unidadTiempoSpan.textContent = '';
