@@ -1,5 +1,5 @@
 const API_BASE_URL = 'https://cancer-predictor-ed.onrender.com/api'; //backend
-
+import { renderTumorGrowthChart } from './chart_renderer.js';
 // Referencias a elementos del DOM
 const introductionSection = document.getElementById('introduction');
 const predictionFormSection = document.getElementById('prediction-form-section');
