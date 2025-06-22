@@ -5,4 +5,4 @@ scipy
 gunicorn
 psycopg2-binary
 SQLAlchemy
-
+python-dotenv
