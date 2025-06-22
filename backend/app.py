@@ -70,6 +70,7 @@ def create_app():
     
     return app
 
+app = create_app()
 
 if __name__ == '__main__':
     # Si quieres ejecutar localmente, asegúrate de que DATABASE_URL esté en tu .env.
