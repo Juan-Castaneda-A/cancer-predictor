@@ -3,6 +3,6 @@ flask-cors
 numpy
 scipy
 gunicorn
-psycopg2-binary==2.9.9
-SQLAlchemy==2.0.30
+psycopg2-binary
+SQLAlchemy
 
