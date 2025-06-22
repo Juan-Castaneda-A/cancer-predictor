@@ -1,5 +1,5 @@
 const API_BASE_URL = 'https://cancer-predictor-ed.onrender.com/api'; //backend
-import { renderTumorGrowthChart } from './chart_renderer.js';
+
 // Referencias a elementos del DOM
 const introductionSection = document.getElementById('introduction');
 const predictionFormSection = document.getElementById('prediction-form-section');
@@ -207,8 +207,14 @@ function displayResults(data) {
 
     // **AHORA, LA LLAMADA A RENDERIZAR EL GRÁFICO**
     // Asegúrate de que los datos de la curva existan y sean válidos
-    const expCurve = data.model_results?.exponential?.curve_data || [];
-    const gomCurve = data.model_results?.gompertz?.curve_data || [];
+    //const expCurve = data.model_results?.exponential?.curve_data || [];
+    const expCurve = Object.keys(data.model_results?.exponential?.curve_data || {}).length
+    ? data.model_results.exponential.curve_data.x.map((x, i) => [x, data.model_results.exponential.curve_data.y[i]])
+    : [];
+    //const gomCurve = data.model_results?.gompertz?.curve_data || [];
+    const gomCurve = Object.keys(data.model_results?.gompertz?.curve_data || {}).length
+    ? data.model_results.gompertz.curve_data.x.map((x, i) => [x, data.model_results.gompertz.curve_data.y[i]])
+    : [];
     const t0 = data.parameters_used_for_prediction?.T0_for_models;
     const tCritical = data.parameters_used_for_prediction?.T_critical;
 
