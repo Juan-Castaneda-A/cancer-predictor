@@ -6,3 +6,5 @@ gunicorn
 psycopg2-binary
 SQLAlchemy
 python-dotenv
+pydantic
+flask-sqlalchemy

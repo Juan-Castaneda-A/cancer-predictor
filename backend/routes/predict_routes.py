@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, current_app
 from services.prediction_service import PredictionService # Importamos el nuevo manejador
 from database.models import get_db # Importamos la función para obtener la sesión de DB
 from datetime import date # Para manejar fechas
+from pydantic import ValidationError
+from schemas.prediction_schemas import PredictionRequest, OtherFactors
 
 # Asumiremos que prediction_service.py será refactorizado en la Fase 2
 # from services.prediction_service import PredictionService # No importamos la función directa, sino la clase
@@ -17,53 +19,34 @@ def predict():
     prediction_service = PredictionService(db_session)
 
     try:
-        data = request.json
+        #1. Validar la solicitud JSON usando pydantic
+        #Esto automáticamente convierte y valida los tipos de datos
+        #Los errores de validación serán capturados por ValidationError
+        #data = request.json
+        data=PredictionRequest.model_validate(request.json)
 
-        # --- Extracción de datos del request (ahora más complejos) ---
-        identification_number = data.get('identification_number')
-        current_tumor_size = data.get('current_tumor_size')
-        current_measurement_date_str = data.get('current_measurement_date')
+        #2 --- Extracción de datos del request (ahora más complejos) ---
+        #Los datos ya están en el formato y tipo correctos
+        identification_number = data.identification_number
+        current_tumor_size = data.current_tumor_size
+        current_measurement_date = data.current_measurement_date
+        name = data.name
+        date_of_birth = data.date_of_birth
+        T_critical = data.T_critical
 
-        # Campos opcionales (incluyendo los que ya tenías y los nuevos)
-        name = data.get('name') # Necesario si es un paciente nuevo
-        date_of_birth_str = data.get('date_of_birth') # Necesario si es un paciente nuevo
-        # Umbral crítico (ahora opcional en input, con default en service)
-        T_critical = data.get('T_critical') 
+        # Los other_factors ahora son una instancia de OtherFactors, no un dict
+        # Se convierten a dict antes de pasarlos al servicio
+        other_factors = data.other_factors.model_dump() if data.other_factors else {}
 
-        # Otros factores opcionales que se pasan al servicio
-        # Asegúrate de que estos nombres de clave coincidan con los usados en _get_bibliographic_parameters
-        other_factors = {
-            'tipo_cancer': data.get('tipo_cancer'),
-            'subtipo_molecular': data.get('subtipo_molecular'), # <-- Asegúrate que tu frontend envía esto
-            'grado_histopatologico': data.get('grado_histopatologico'), # <-- Asegúrate que tu frontend envía esto
-            'er_pr': data.get('er_pr'),
-            'her2': data.get('her2'),
-            'metastasis': data.get('metastasis')
-            # 'dias_tratamiento' y 'estadio' eliminados/manejados diferente
-            # 'edad' se calculará de date_of_birth
-        }
+        #--- Validaciones básicas (se mejorarán en la Fase 2 con Pydantic/Marshmallow) ---
+        #3. Validación específica para pacientes nuevos
+        # Pydantic valida los tipos, pero la lógica de "requerido si es nuevo" va aquí
+        patient_exists = prediction_service.patient_data_manager.get_patient_by_identification_number(identification_number)
+        if not patient_exists:
+            if not name or not date_of_birth:
+                return jsonify({"error": "Para un paciente nuevo, 'name' y 'date_of_birth' son campos obligatorios."}), 400
 
-        # --- Validaciones básicas (se mejorarán en la Fase 2 con Pydantic/Marshmallow) ---
-        if not all([identification_number, current_tumor_size, current_measurement_date_str]):
-            return jsonify({"error": "Missing required fields: identification_number, current_tumor_size, current_measurement_date."}), 400
-
-        try:
-            current_tumor_size = float(current_tumor_size)
-            current_measurement_date = date.fromisoformat(current_measurement_date_str)
-            if T_critical is not None: # Solo convertir si viene en el request
-                T_critical = float(T_critical)
-        except (ValueError, TypeError) as e:
-            return jsonify({"error": f"Invalid format for numerical parameters or date: {e}"}), 400
-
-        # Convertir fecha de nacimiento si está presente para nuevo paciente
-        date_of_birth = None
-        if date_of_birth_str:
-            try:
-                date_of_birth = date.fromisoformat(date_of_birth_str)
-            except ValueError:
-                return jsonify({"error": "Invalid date format for date_of_birth."}), 400
-
-        # --- Llamada al PredictionService (Toda la lógica principal se mueve aquí) ---
+        #4. --- Llamada al PredictionService (Toda la lógica principal se mueve aquí) ---
         result = prediction_service.predict(
             identification_number=identification_number,
             current_tumor_size=current_tumor_size,
@@ -77,13 +60,20 @@ def predict():
         # El PredictionService ahora devuelve el resultado completo
         return jsonify(result), 200
 
-    except ValueError as ve: # Errores de validación o lógicos desde el servicio
-        current_app.logger.warning(f"Client input error: {ve}")
+    except ValidationError as e:
+        # Pydantic genera errores detallados
+        current_app.logger.warning(f"Validation error: {e.errors()}")
+        db_session.rollback()
+        return jsonify({"error": "Invalid input data", "details": e.errors()}), 422 # 422 Unprocessable Entity
+    except ValueError as ve: 
+        # Errores de validación o lógicos desde el servicio (ej. tiempo <= 0)
+        current_app.logger.warning(f"Client input/service logic error: {ve}")
         db_session.rollback()
         return jsonify({"error": str(ve)}), 400
-    except Exception as e: # Cualquier otro error inesperado
+    except Exception as e:
         current_app.logger.error(f"Server error during prediction: {e}", exc_info=True)
-        db_session.rollback() # Asegura rollback en cualquier error
-        return jsonify({"error": "An unexpected server error occurred."}), 500
+        db_session.rollback()
+        return jsonify({"error": "An unexpected server error occurred. Please try again later."}), 500
     finally:
-        db_session.close() # Asegúrate de cerrar la sesión de la base de datos
+        db_session.close()
+

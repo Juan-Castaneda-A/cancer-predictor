@@ -1,4 +1,8 @@
+import os
+
 class Config:
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     FRONTEND_URL = "https://cancer-frontend.onrender.com"
     # Puerto del backend
     FLASK_RUN_PORT = 5000
