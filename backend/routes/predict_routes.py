@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from services.prediction_service import PredictionService # Importamos el nuevo manejador
-from database.models import get_db # Importamos la función para obtener la sesión de DB
+from database.models import db # Importamos la función para obtener la sesión de DB
 from datetime import date # Para manejar fechas
 from pydantic import ValidationError
 from schemas.prediction_schemas import PredictionRequest, OtherFactors
@@ -14,7 +14,7 @@ predict_bp = Blueprint('predict', __name__)
 def predict():
     # --- Gestión de la sesión de base de datos ---
     # get_db() es un generador, así que usamos 'next()' para obtener la sesión
-    db_session = next(get_db())
+    db_session=db.session
     # Instancia PredictionService, pasándole la sesión de DB
     prediction_service = PredictionService(db_session)
 
