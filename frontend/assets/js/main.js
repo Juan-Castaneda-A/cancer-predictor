@@ -208,13 +208,18 @@ function displayResults(data) {
     // **AHORA, LA LLAMADA A RENDERIZAR EL GRÁFICO**
     // Asegúrate de que los datos de la curva existan y sean válidos
     //const expCurve = data.model_results?.exponential?.curve_data || [];
-    const expCurve = Object.keys(data.model_results?.exponential?.curve_data || {}).length
-    ? data.model_results.exponential.curve_data.x.map((x, i) => [x, data.model_results.exponential.curve_data.y[i]])
-    : [];
+    let expCurve = [];
+    const curveExpRaw = data.model_results?.exponential?.curve_data;
+    if (curveExpRaw && curveExpRaw.x && curveExpRaw.y) {
+        expCurve = curveExpRaw.x.map((x, i) => [x, curveExpRaw.y[i]]);
+    }
+
     //const gomCurve = data.model_results?.gompertz?.curve_data || [];
-    const gomCurve = Object.keys(data.model_results?.gompertz?.curve_data || {}).length
-    ? data.model_results.gompertz.curve_data.x.map((x, i) => [x, data.model_results.gompertz.curve_data.y[i]])
-    : [];
+    let gomCurve = [];
+    const curveGomRaw = data.model_results?.gompertz?.curve_data;
+    if (curveGomRaw && curveGomRaw.x && curveGomRaw.y) {
+        gomCurve = curveGomRaw.x.map((x, i) => [x, curveGomRaw.y[i]]);
+    }
     const t0 = data.parameters_used_for_prediction?.T0_for_models;
     const tCritical = data.parameters_used_for_prediction?.T_critical;
 
