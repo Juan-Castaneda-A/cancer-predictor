@@ -90,11 +90,14 @@ class PredictionService:
         
         return {"r": r_per_day, "K": K_cm3}
     
-    def _calculate_empirical_r(self, T_anterior: float, T_actual: float, time_diff_days: int) -> float:
+    def _calculate_empirical_r(self, T_anterior: float, T_actual: float, time_diff_days: float) -> float:
         """
         Calcula la tasa de crecimiento "r" empírica para el modelo exponencial entre dos mediciones.
         Retorna un valor negativo si el tumor disminuye.
         """
+        T_anterior = float(T_anterior)
+        T_actual = float(T_actual)
+        time_diff_days = float(time_diff_days)  # Conversión crítica
         if time_diff_days <= 0:
             raise ValueError("El tiempo de diferencia tiene que ser positivo para calcular el 'r' empírico.")
         if T_anterior <= 0 or T_actual <= 0:
@@ -217,35 +220,47 @@ class PredictionService:
         # ---Lógica de Predicción de Modelos (de tu antigua get_prediction_data) ---
         model_results = {}
 
+        # Define las fórmulas LaTeX para cada modelo
+        formula_exp = r"T(t) = T_0 \cdot e^{rt}"
+        formula_gompertz = r"T(t) = K \cdot \exp\left( \ln\left(\frac{T_0}{K}\right) \cdot \exp(-rt) \right)"
+
         #Si el tumor está regresando, no calculamos tiempo a umbral positivo
         if prediction_status == "tumor_regressing":
             # Aún podemos generar una curva si queremos visualizar la regresión,
             # pero el 'tiempo_estimado' no será relevante para un umbral creciente.
             # Podemos poner 0 o null y ajustar el frontend para manejarlo.
-            model_results["exponential"] = {
-                "prediction_days": None,
-                "confidence_interval": [None, None],
-                "curve_data": [], # Podrías generar una curva descendente si r_final es negativo
-                "formula": r"T(t) = T_0 \cdot e^{rt}",
-                "status": prediction_status,
-                "notes": "El tumor está en regresión, no se calcula tiempo a umbral de crecimiento."
-            }
+            # Modelo Exponencial para regresión
+            try:
+                curve_exp = exponential_model.generate_exponential_curve_points(T0_for_models, r_final, max_time_limit=365*2) # Ejemplo: 2 años
+                model_results["exponential"] = {
+                    "prediction_days": None,
+                    "unit": "días",
+                    "confidence_interval": [None, None],
+                    "curve_data": curve_exp,
+                    "formula": formula_exp,
+                    "status": prediction_status,
+                    "notes": "El tumor está en regresión, no se calcula tiempo a umbral de crecimiento positivo."
+                }
+            except Exception as e:
+                model_results["exponential"] = {"error": f"Error generando curva exponencial para regresión: {e}", "status": "error"}
+
+            # Modelo Gompertz para regresión (puede que no sea adecuado)
             model_results["gompertz"] = {
                 "prediction_days": None,
+                "unit": "días",
                 "confidence_interval": [None, None],
-                "curve_data": [], # Podrías generar una curva descendente si r_final es negativo
-                "formula": r"T(t) = K \cdot \exp\left( \ln\left(\frac{T_0}{K}\right) \cdot \exp(-rt) \right)",
+                "curve_data": [], # Generalmente no se aplica para regresión sin K < T0
+                "formula": formula_gompertz,
                 "status": prediction_status,
-                "notes": "El tumor está en regresión, no se calcula tiempo a umbral de crecimiento."
+                "notes": "El tumor está en regresión. El modelo de Gompertz puede no ser aplicable o no se calcula para este escenario."
             }
-        else:
-            # Calcular para el modelo exponencial
+        else: # Si el tumor NO está regresando (r_final >= 0)
+            # --- Modelo Exponencial ---
             try:
                 time_exp = exponential_model.calculate_time_to_threshold_exponential(T0_for_models, r_final, T_critical)
-                curve_exp = exponential_model.generate_exponential_curve_points(T0_for_models, r_final, max_time_limit=time_exp * 2 if time_exp else 365*5) # Límite por defecto si tiempo_exp es 0/None
+                curve_exp = exponential_model.generate_exponential_curve_points(T0_for_models, r_final, max_time_limit=time_exp * 2 if time_exp else 365*5)
                 lower_exp, upper_exp = exponential_model.calculate_confidence_interval_exponential(time_exp)
-                
-                # Convertir a años si es necesario
+
                 time_unit_exp = "días"
                 if time_exp is not None and time_exp > 365:
                     time_exp /= 365.25
@@ -258,7 +273,7 @@ class PredictionService:
                     "unit": time_unit_exp,
                     "confidence_interval": [round(lower_exp, 2) if lower_exp is not None else None, round(upper_exp, 2) if upper_exp is not None else None],
                     "curve_data": curve_exp,
-                    "formula": r"T(t) = T_0 \cdot e^{rt}",
+                    "formula": formula_exp,
                     "status": "ok"
                 }
             except ValueError as ve:
@@ -266,17 +281,15 @@ class PredictionService:
             except Exception as e:
                 model_results["exponential"] = {"error": f"Error inesperado en modelo exponencial: {e}", "status": "error"}
 
-            # Calcular para el modelo de Gompertz
+            # --- Modelo de Gompertz ---
             try:
-                # Validar T0 < T_critical < K para Gompertz
                 if not (T0_for_models < T_critical < K_final):
                     raise ValueError(f"Para Gompertz, se requiere T0 ({T0_for_models:.2f}) < Umbral Crítico ({T_critical:.2f}) < K ({K_final:.2f}).")
-                
+
                 time_gompertz = gompertz_model.calculate_time_to_threshold_gompertz(T0_for_models, r_final, K_final, T_critical)
-                curve_gompertz = gompertz_model.generate_gompertz_curve_points(T0_for_models, r_final, K_final, max_time_limit=time_gompertz * 1.5 if time_gompertz else 365*5) # Límite por defecto
+                curve_gompertz = gompertz_model.generate_gompertz_curve_points(T0_for_models, r_final, K_final, max_time_limit=time_gompertz * 1.5 if time_gompertz else 365*5)
                 lower_gompertz, upper_gompertz = gompertz_model.calculate_confidence_interval_gompertz(time_gompertz)
 
-                # Convertir a años si es necesario
                 time_unit_gompertz = "días"
                 if time_gompertz is not None and time_gompertz > 365:
                     time_gompertz /= 365.25
@@ -289,7 +302,7 @@ class PredictionService:
                     "unit": time_unit_gompertz,
                     "confidence_interval": [round(lower_gompertz, 2) if lower_gompertz is not None else None, round(upper_gompertz, 2) if upper_gompertz is not None else None],
                     "curve_data": curve_gompertz,
-                    "formula": r"T(t) = K \cdot \exp\left( \ln\left(\frac{T_0}{K}\right) \cdot \exp(-rt) \right)",
+                    "formula": formula_gompertz,
                     "status": "ok"
                 }
             except ValueError as ve:
@@ -299,15 +312,20 @@ class PredictionService:
 
         #--- Construcción de la respuesta final ---
         response_data = {
-            "status": prediction_status, # "ok" o "tumor_regressing"
-            "message": interpretive_notes, # Mensajes para el usuario
-            "patient_info": patient_info,
+            "status": prediction_status, # "ok", "tumor_regressing"
+            "message": interpretive_notes, # Mensajes para el usuario (información sobre r, regresión, etc.)
+            "patient_info": patient_info, # Detalles del paciente, edad, etapa simplificada, etc.
             "parameters_used_for_prediction": {
-                "T0_for_models": T0_for_models, # Este es el 'T0' para las fórmulas
+                "T0_for_models": T0_for_models,
                 "r_final": r_final,
                 "K_final": K_final,
-                "T_critical": T_critical
+                "T_critical": T_critical,
+                "r_bibliographic_value": r_bibliographic, # Añadir para transparencia
+                "K_bibliographic_value": K_bibliographic, # Añadir para transparencia
+                "r_empirical_calculated": patient_info.get("r_empirical_calculated") # Re-incluir si existe
             },
-            "model_results": model_results
+            "model_results": model_results # Contiene los resultados de ambos modelos
         }
         return response_data
+    
+#tipo
