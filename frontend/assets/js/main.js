@@ -210,16 +210,18 @@ function displayResults(data) {
     //const expCurve = data.model_results?.exponential?.curve_data || [];
     let expCurve = [];
     const curveExpRaw = data.model_results?.exponential?.curve_data;
-    if (curveExpRaw && curveExpRaw.x && curveExpRaw.y) {
-        expCurve = curveExpRaw.x.map((x, i) => [x, curveExpRaw.y[i]]);
+    if (Array.isArray(curveExpRaw) && curveExpRaw.length > 0) {
+        expCurve = curveExpRaw.map(point => [point.x, point.y]);
     }
+
 
     //const gomCurve = data.model_results?.gompertz?.curve_data || [];
     let gomCurve = [];
     const curveGomRaw = data.model_results?.gompertz?.curve_data;
-    if (curveGomRaw && curveGomRaw.x && curveGomRaw.y) {
-        gomCurve = curveGomRaw.x.map((x, i) => [x, curveGomRaw.y[i]]);
+    if (Array.isArray(curveGomRaw) && curveGomRaw.length > 0) {
+        gomCurve = curveGomRaw.map(point => [point.x, point.y]);
     }
+
     const t0 = data.parameters_used_for_prediction?.T0_for_models;
     const tCritical = data.parameters_used_for_prediction?.T_critical;
 
