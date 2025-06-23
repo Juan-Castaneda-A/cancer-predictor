@@ -1,13 +1,15 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Carga las variables del archivo .env
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    # Usa os.getenv() correctamente
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///local.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    FRONTEND_URL = "https://cancer-frontend.onrender.com"
-    # Puerto del backend
-    FLASK_RUN_PORT = 5000
-    # Desactivar modo debug en producción
-    DEBUG = True
+    FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+    FLASK_RUN_PORT = int(os.getenv('FLASK_RUN_PORT', 5000))
+    DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
     TESTING = False
 
 # NOTA: Los valores a continuación son representativos de los rangos y medianas proporcionados.

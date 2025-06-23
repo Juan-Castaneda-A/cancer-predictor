@@ -20,6 +20,9 @@ def create_app():
     # Cargar configuración desde tu objeto Config
     app.config.from_object(Config)
 
+    if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+        raise ValueError("No se configuró SQLALCHEMY_DATABASE_URI. Verifica tu archivo .env o configuración")
+
     # Asegurar que la URL de PostgreSQL tenga el formato correcto
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith("postgres://"):
         app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace(
@@ -75,7 +78,6 @@ app = create_app()
 if __name__ == '__main__':
     # Si quieres ejecutar localmente, asegúrate de que DATABASE_URL esté en tu .env.
     # Config.DEBUG y Config.FLASK_RUN_PORT seguirán funcionando como los tienes.
-    app = create_app()
     with app.app_context():
         db.create_all()  # Crear tablas si no existen
     app.run(debug=Config.DEBUG, port=Config.FLASK_RUN_PORT)

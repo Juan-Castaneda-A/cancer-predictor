@@ -25,7 +25,7 @@ function renderTumorGrowthChart(exponentialCurveData, gompertzCurveData, T0_valu
     if (exponentialCurveData && exponentialCurveData.length > 0) {
         datasets.push({
             label: 'Modelo Exponencial',
-            data: exponentialCurveData.map(point => ({ x: point[0], y: point[1] })),
+            data: exponentialCurveData.map(point => ({ x: point.x, y: point.y })),
             borderColor: 'rgb(75, 192, 192)',
             borderWidth: 2,
             fill: false,
@@ -37,7 +37,7 @@ function renderTumorGrowthChart(exponentialCurveData, gompertzCurveData, T0_valu
     if (gompertzCurveData && gompertzCurveData.length > 0) {
         datasets.push({
             label: 'Modelo Gompertz',
-            data: gompertzCurveData.map(point => ({ x: point[0], y: point[1] })),
+            data: gompertzCurveData.map(point => ({ x: point.x, y: point.y })),
             borderColor: 'rgb(255, 99, 132)',
             borderWidth: 2,
             fill: false,
