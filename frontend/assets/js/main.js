@@ -166,8 +166,21 @@ function displayResults(data) {
             } else {
                 expTiempoEstimadoSpan.textContent = expResults.prediction_days !== null ? expResults.prediction_days.toFixed(2) : "N/A";
                 expUnidadTiempoSpan.textContent = expResults.unit || "";
-                expIntervaloConfianzaSpan.textContent = expResults.confidence_interval ? 
-                    `${expResults.confidence_interval[0].toFixed(2)} - ${expResults.confidence_interval[1].toFixed(2)} ${expResults.unit}` : "N/A";
+                //expIntervaloConfianzaSpan.textContent = expResults.confidence_interval ? 
+                //    `${expResults.confidence_interval[0].toFixed(2)} - ${expResults.confidence_interval[1].toFixed(2)} ${expResults.unit}` : "N/A";
+                if (
+                    expResults.confidence_interval &&
+                    Array.isArray(expResults.confidence_interval) &&
+                    expResults.confidence_interval.length === 2 &&
+                    typeof expResults.confidence_interval[0] === 'number' &&
+                    typeof expResults.confidence_interval[1] === 'number'
+                ) {
+                    expIntervaloConfianzaSpan.textContent =
+                        `${expResults.confidence_interval[0].toFixed(2)} - ${expResults.confidence_interval[1].toFixed(2)} ${expResults.unit}`;
+                } else {
+                    expIntervaloConfianzaSpan.textContent = "N/A";
+                }
+                
                 expNotesP.textContent = expResults.notes || "";
             }
             // MathJax para la fórmula (se abordará en Fase 3 - Parte 4)
@@ -190,8 +203,21 @@ function displayResults(data) {
             } else {
                 gomTiempoEstimadoSpan.textContent = gomResults.prediction_days !== null ? gomResults.prediction_days.toFixed(2) : "N/A";
                 gomUnidadTiempoSpan.textContent = gomResults.unit || "";
-                gomIntervaloConfianzaSpan.textContent = gomResults.confidence_interval ? 
-                    `${gomResults.confidence_interval[0].toFixed(2)} - ${gomResults.confidence_interval[1].toFixed(2)} ${gomResults.unit}` : "N/A";
+                //gomIntervaloConfianzaSpan.textContent = gomResults.confidence_interval ? 
+                //    `${gomResults.confidence_interval[0].toFixed(2)} - ${gomResults.confidence_interval[1].toFixed(2)} ${gomResults.unit}` : "N/A";
+                if (
+                    gomResults.confidence_interval &&
+                    Array.isArray(gomResults.confidence_interval) &&
+                    gomResults.confidence_interval.length === 2 &&
+                    typeof gomResults.confidence_interval[0] === 'number' &&
+                    typeof gomResults.confidence_interval[1] === 'number'
+                ) {
+                    gomIntervaloConfianzaSpan.textContent =
+                        `${gomResults.confidence_interval[0].toFixed(2)} - ${gomResults.confidence_interval[1].toFixed(2)} ${gomResults.unit}`;
+                } else {
+                    gomIntervaloConfianzaSpan.textContent = "N/A";
+                }
+                
                 gomNotesP.textContent = gomResults.notes || "";
             }
             // MathJax para la fórmula (se abordará en Fase 3 - Parte 4)
