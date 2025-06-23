@@ -237,7 +237,7 @@ function displayResults(data) {
     let expCurve = [];
     const curveExpRaw = data.model_results?.exponential?.curve_data;
     if (Array.isArray(curveExpRaw) && curveExpRaw.length > 0) {
-        expCurve = curveExpRaw.map(point => [point.x, point.y]);
+        expCurve = curveExpRaw.map(point => ({ x: point.x, y: point.y }));
     }
 
 
@@ -245,7 +245,7 @@ function displayResults(data) {
     let gomCurve = [];
     const curveGomRaw = data.model_results?.gompertz?.curve_data;
     if (Array.isArray(curveGomRaw) && curveGomRaw.length > 0) {
-        gomCurve = curveGomRaw.map(point => [point.x, point.y]);
+        gomCurve = curveGomRaw.map(point => ({ x: point.x, y: point.y }));
     }
 
     const t0 = data.parameters_used_for_prediction?.T0_for_models;
