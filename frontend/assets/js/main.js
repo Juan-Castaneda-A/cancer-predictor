@@ -293,8 +293,10 @@ function clearFormError() {
 }
 
 // --- Event Listeners ---
-btnExponential.addEventListener('click', () => updateFormForModel('exponencial'));
-btnGompertz.addEventListener('click', () => updateFormForModel('gompertz'));
+btnStartPrediction.addEventListener('click', () => {
+    showSection('prediction-form-section');
+    scrollToSection('prediction-form-section');
+});
 
 predictionForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -307,7 +309,7 @@ predictionForm.addEventListener('submit', async (event) => {
     
     // Recopilar otros factores solo si tienen un valor seleccionado
     const otherFactors = {};
-    if (tipoCancerSelect.value) otherFactors.tipo_cancer = tipoCancerSelect.value;
+    //if (tipoCancerSelect.value) otherFactors.tipo_cancer = tipoCancerSelect.value;
     if (subtipoMolecularSelect.value) otherFactors.subtipo_molecular = subtipoMolecularSelect.value;
     if (gradoHistopatologicoSelect.value) otherFactors.grado_histopatologico = gradoHistopatologicoSelect.value;
     if (erPrSelect.value) otherFactors.er_pr = erPrSelect.value;
@@ -318,7 +320,7 @@ predictionForm.addEventListener('submit', async (event) => {
         identification_number: identificationNumberInput.value.trim(),
         current_tumor_size: parseFloat(currentTumorSizeInput.value),
         current_measurement_date: currentMeasurementDateInput.value, // Formato YYYY-MM-DD
-        T_critical: parseFloat(criticalThresholdInput.value),
+        //T_critical: parseFloat(criticalThresholdInput.value),
         
         // Incluir campos de paciente nuevo si se llenan
         // El backend verificará si son necesarios o si el paciente ya existe

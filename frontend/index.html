@@ -17,18 +17,16 @@
     <main>
         <section id="introduction" class="container">
             <h2>Bienvenido/a</h2>
-            <p>Explore los siguientes modelos matemáticos para estimar la progresión del tumor y el tiempo de vida hasta un umbral crítico en pacientes con cáncer de mama. Esta herramienta es de carácter **educativo y no sustituye el consejo médico profesional.**</p>
+            <p>Explore los siguientes modelos matemáticos para estimar la progresión del tumor y el tiempo de vida hasta un umbral crítico en pacientes con cáncer de mama. Esta herramienta es de carácter <strong>educativo y no sustituye el consejo médico profesional.</strong></p>
             <p>Destacamos la utilidad de las ecuaciones diferenciales en la oncología y cómo esta herramienta puede servir como apoyo académico o investigativo.</p>
             
-            <div class="model-selection">
-                <button id="btnExponential" data-model="exponencial">Probar Modelo Exponencial</button>
-                <button id="btnGompertz" data-model="gompertz">Probar Modelo Gompertz</button>
-                <button id="btnCalibrate" disabled>Calibrar Modelo con Datos Reales (Próximamente)</button>
+            <div class="start-prediction-container">
+                <button id="btnStartPrediction">Iniciar Predicción</button>
             </div>
         </section>
 
         <section id="prediction-form-section" class="container hidden">
-            <h2>Calculadora de Predicción <span id="model-name"></span></h2>
+            <h2>Calculadora de Predicción</h2>
             <form id="predictionForm">
                 <h3>1. Datos del Paciente y Medición Actual</h3>
                 <div class="form-group">
@@ -46,12 +44,7 @@
                     <input type="date" id="current_measurement_date" name="current_measurement_date" required>
                     <small>Fecha en la que se tomó la medición actual del tumor.</small>
                 </div>
-                <div class="form-group">
-                    <label for="T_critical">Umbral Crítico (cm³):</label>
-                    <input type="number" id="T_critical" name="T_critical" step="0.01" min="0.1" value="10.0" required placeholder="Ej: 10.0">
-                    <small>Tamaño del tumor que se considera crítico.</small>
-                </div>
-                
+
                 <h4>Para Pacientes Nuevos (Opcional si ya existe el ID):</h4>
                 <div class="form-group">
                     <label for="patient_name">Nombre del Paciente:</label>
@@ -138,12 +131,12 @@
                 <p id="params-general-message"></p>
                 <ul>
                     <li><strong>Tamaño Inicial ($T_0$):</strong> <span id="params-T0">--</span></li>
-                    <li><strong>Umbral Crítico ($T_{critical}$):</strong> <span id="params-Tcritical">--</span></li>
+                    <li><strong>Umbral Exponencial ($K$):</strong> <span id="params-Tcrit-exp">--</span></li>
+                    <li><strong>Umbral Gompertz ($0.99K$):</strong> <span id="params-Tcrit-gom">--</span></li>
                     <li><strong>Tasa de Crecimiento Final ($r_{final}$):</strong> <span id="params-r-final">--</span></li>
                     <li><strong>Capacidad Máxima ($K_{final}$):</strong> <span id="params-K-final">--</span></li>
-                    <li><strong>Tasa Empírica Calculada ($r_{empírica}$):</strong> <span id="params-r-empirical">--</span></li>
-                    <li><strong>Tasa Bibliográfica Base ($r_{bibliográfica}$):</strong> <span id="params-r-bibliographic">--</span></li>
-                    <li><strong>Capacidad Bibliográfica Base ($K_{bibliográfica}$):</strong> <span id="params-K-bibliographic">--</span></li>
+                    <li><strong>Tasa Empírica ($r_{empírica}$):</strong> <span id="params-r-empirical">--</span></li>
+                    <li><strong>Tasa Bibliográfica ($r_{bibliográfica}$):</strong> <span id="params-r-bibliographic">--</span></li>
                 </ul>
             </div>
         
@@ -175,42 +168,17 @@
             
             <div class="disclaimer">
                 <h3>Importante: Descargo de Responsabilidad Médico</h3>
-                <p>Este modelo es una **simulación matemática con fines educativos y académicos únicamente.** No está diseñado para ser una herramienta de diagnóstico, pronóstico o tratamiento médico. Las predicciones se basan en modelos simplificados y no consideran todas las complejidades biológicas individuales de cada paciente.</p>
-                <p><strong>Bajo ninguna circunstancia debe utilizar esta herramienta para tomar decisiones sobre su salud o la de otros.</strong> Siempre consulte a un profesional médico calificado para cualquier problema de salud, diagnóstico o plan de tratamiento.</p>
+                <p>Este modelo es una <strong>simulación matemática con fines educativos y académicos únicamente.</strong> No está diseñado para ser una herramienta de diagnóstico, pronóstico o tratamiento médico.</p>
+                <p><strong>Bajo ninguna circunstancia debe utilizar esta herramienta para tomar decisiones sobre su salud o la de otros.</strong> Siempre consulte a un profesional médico calificado.</p>
             </div>
         
             <div class="actions">
                 <button id="btnNewPrediction">Nueva Predicción</button>
-                <button id="btnExportPdf" disabled>Exportar a PDF (Próximamente)</button>
             </div>
         </section>
 
         <section id="about-section" class="container">
-            <h2>Acerca de / Metodología</h2>
-            <p>Este proyecto explora la aplicación de modelos de ecuaciones diferenciales en el estudio del crecimiento tumoral. Los modelos exponencial y de Gompertz son herramientas fundamentales en la biofísica para describir dinámicas de poblaciones y crecimiento celular, incluyendo la progresión de tumores.</p>
-            
-            <h3>Modelo Exponencial</h3>
-            <p>Describe un crecimiento ilimitado donde la tasa de cambio es directamente proporcional al tamaño actual. Es útil para las fases tempranas de crecimiento tumoral.</p>
-            <p class="math-formula">$$\frac{dT}{dt} = rT \quad \Rightarrow \quad T(t) = T_0 \cdot e^{rt}$$</p>
-            <ul>
-                <li>$T(t)$: Tamaño del tumor en el tiempo $t$</li>
-                <li>$T_0$: Tamaño inicial del tumor</li>
-                <li>$r$: Tasa de crecimiento</li>
-            </ul>
-
-            <h3>Modelo de Gompertz</h3>
-            <p>Este modelo es más realista para el crecimiento tumoral a largo plazo, ya que incorpora una desaceleración de la tasa de crecimiento a medida que el tumor se acerca a su capacidad máxima ($K$), reflejando limitaciones de recursos o espacio.</p>
-            <p class="math-formula">$$\frac{dT}{dt} = rT \cdot \ln\left(\frac{K}{T}\right) \quad \Rightarrow \quad T(t) = K \cdot \exp\left( \ln\left(\frac{T_0}{K}\right) \cdot \exp(-rt) \right)$$</p>
-            <ul>
-                <li>$T(t)$: Tamaño del tumor en el tiempo $t$</li>
-                <li>$T_0$: Tamaño inicial del tumor</li>
-                <li>$r$: Tasa de crecimiento inicial</li>
-                <li>$K$: Capacidad máxima del tumor</li>
-            </ul>
-
-            <p>Es importante recordar que estos modelos son simplificaciones y no capturan la complejidad total de los sistemas biológicos, incluyendo factores como la respuesta inmune del paciente, la heterogeneidad tumoral, la resistencia a tratamientos o la influencia de comorbilidades. Su aplicación debe ser siempre en un contexto de investigación o educación.</p>
-        </section>
-
+            </section>
     </main>
 
     <footer>

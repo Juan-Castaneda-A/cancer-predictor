@@ -30,17 +30,21 @@ h1, h2, h3 {
     margin-bottom: 15px;
 }
 
+/* ... (todo el CSS anterior sin cambios) ... */
+
 p {
     margin-bottom: 10px;
 }
 
-.model-selection {
+/* ESTILO AÑADIDO PARA EL NUEVO CONTENEDOR DEL BOTÓN */
+.start-prediction-container {
     text-align: center;
     margin-top: 30px;
 }
 
-.model-selection button {
-    background-color: #28a745; /* Verde para los botones principales */
+/* Estilo modificado para aplicar al nuevo botón */
+.start-prediction-container button {
+    background-color: #28a745; /* Verde para el botón principal */
     color: white;
     border: none;
     padding: 15px 30px;
@@ -52,16 +56,12 @@ p {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.model-selection button:hover {
+.start-prediction-container button:hover {
     background-color: #218838;
     transform: translateY(-2px);
 }
 
-.model-selection button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-    box-shadow: none;
-}
+/* ... (el resto del CSS sin cambios) ... */
 
 /* Formulario */
 .form-group {
