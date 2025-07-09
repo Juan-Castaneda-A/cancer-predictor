@@ -32,7 +32,7 @@ def predict():
         current_measurement_date = data.current_measurement_date
         name = data.name
         date_of_birth = data.date_of_birth
-        T_critical = data.T_critical
+        #T_critical = data.T_critical
 
         # Los other_factors ahora son una instancia de OtherFactors, no un dict
         # Se convierten a dict antes de pasarlos al servicio
@@ -53,7 +53,7 @@ def predict():
             current_measurement_date=current_measurement_date,
             patient_name=name, # Se pasa solo si es un nuevo paciente, el servicio lo manejará
             date_of_birth=date_of_birth, # Se pasa solo si es un nuevo paciente, el servicio lo manejará
-            T_critical=T_critical,
+            #T_critical=T_critical,
             other_factors=other_factors
         )
         

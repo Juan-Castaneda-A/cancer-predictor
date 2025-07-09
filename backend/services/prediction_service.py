@@ -176,6 +176,13 @@ class PredictionService:
         r_bibliographic = bibliographic_params["r"]
         K_bibliographic = bibliographic_params["K"]
 
+        # --- VALIDACIÓN (PUNTO 3) ---
+        # Se usa K_bibliographic, que ahora es nuestro K_final.
+        K_final = K_bibliographic
+        if current_tumor_size >= K_final:
+            raise ValueError(f"El tamaño actual del tumor ({current_tumor_size} cm³) es mayor o igual a la capacidad de carga del modelo (K = {K_final:.2f} cm³). No se puede predecir un crecimiento futuro.")
+
+
         # --- Cálculo y Priorización de 'r' (Empírica vs. Bibliográfica) ---
         r_empirical = None
         if len(all_measurements) >= 2:
@@ -215,7 +222,7 @@ class PredictionService:
             r_final = r_bibliographic
             interpretive_notes += f"Utilizando tasa de crecimiento bibliográfica (r={r_final:.4f} por día) debido a la falta de datos empíricos o un cálculo inválido. "
 
-        K_final = K_bibliographic #Por ahora, K siempre es bibliográfica
+        #K_final = K_bibliographic #Por ahora, K siempre es bibliográfica
 
         # ---Lógica de Predicción de Modelos (de tu antigua get_prediction_data) ---
         model_results = {}
@@ -223,6 +230,11 @@ class PredictionService:
         # Define las fórmulas LaTeX para cada modelo
         formula_exp = r"T(t) = T_0 \cdot e^{rt}"
         formula_gompertz = r"T(t) = K \cdot \exp\left( \ln\left(\frac{T_0}{K}\right) \cdot \exp(-rt) \right)"
+
+        # --- NUEVA LÓGICA DE UMBRALES (PUNTO 2) ---
+        T_critical_exponential = K_final # El umbral para el modelo exponencial es K
+        T_critical_gompertz = K_final * 0.99 # El umbral para Gompertz es 99% de K
+
 
         #Si el tumor está regresando, no calculamos tiempo a umbral positivo
         if prediction_status == "tumor_regressing":
@@ -255,9 +267,9 @@ class PredictionService:
                 "notes": "El tumor está en regresión. El modelo de Gompertz puede no ser aplicable o no se calcula para este escenario."
             }
         else: # Si el tumor NO está regresando (r_final >= 0)
-            # --- Modelo Exponencial ---
+            # --- Modelo Exponencial con el nuevo umbral ---
             try:
-                time_exp = exponential_model.calculate_time_to_threshold_exponential(T0_for_models, r_final, T_critical)
+                time_exp = exponential_model.calculate_time_to_threshold_exponential(T0_for_models, r_final, T_critical_exponential)
                 curve_exp = exponential_model.generate_exponential_curve_points(T0_for_models, r_final, max_time_limit=time_exp * 2 if time_exp else 365*5)
                 lower_exp, upper_exp = exponential_model.calculate_confidence_interval_exponential(time_exp)
 
@@ -283,10 +295,10 @@ class PredictionService:
 
             # --- Modelo de Gompertz ---
             try:
-                if not (T0_for_models < T_critical < K_final):
-                    raise ValueError(f"Para Gompertz, se requiere T0 ({T0_for_models:.2f}) < Umbral Crítico ({T_critical:.2f}) < K ({K_final:.2f}).")
+                if not (T0_for_models < T_critical_gompertz):
+                    raise ValueError(f"Para Gompertz, se requiere T0 ({T0_for_models:.2f}) < Umbral Práctico ({T_critical_gompertz:.2f}).")
 
-                time_gompertz = gompertz_model.calculate_time_to_threshold_gompertz(T0_for_models, r_final, K_final, T_critical)
+                time_gompertz = gompertz_model.calculate_time_to_threshold_gompertz(T0_for_models, r_final, K_final, T_critical_gompertz)
                 curve_gompertz = gompertz_model.generate_gompertz_curve_points(T0_for_models, r_final, K_final, max_time_limit=time_gompertz * 1.5 if time_gompertz else 365*5)
                 lower_gompertz, upper_gompertz = gompertz_model.calculate_confidence_interval_gompertz(time_gompertz)
 
@@ -319,7 +331,8 @@ class PredictionService:
                 "T0_for_models": T0_for_models,
                 "r_final": r_final,
                 "K_final": K_final,
-                "T_critical": T_critical,
+                "T_critical_exponential_used": T_critical_exponential,
+                "T_critical_gompertz_used": T_critical_gompertz,
                 "r_bibliographic_value": r_bibliographic, # Añadir para transparencia
                 "K_bibliographic_value": K_bibliographic, # Añadir para transparencia
                 "r_empirical_calculated": patient_info.get("r_empirical_calculated") # Re-incluir si existe

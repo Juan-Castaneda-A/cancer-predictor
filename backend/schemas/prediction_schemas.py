@@ -50,7 +50,7 @@ class PredictionRequest(BaseModel):
     date_of_birth: Optional[date] = Field(None, description="Fecha de nacimiento del paciente (YYYY-MM-DD, requerido para nuevos pacientes).")
 
     # Umbral crítico
-    T_critical: PositiveFloat = Field(10.0, description="Umbral crítico de tamaño del tumor en cm³ para la predicción.")
+    #T_critical: PositiveFloat = Field(10.0, description="Umbral crítico de tamaño del tumor en cm³ para la predicción.")
 
     # Otros factores usando el esquema anidado
     other_factors: Optional[OtherFactors] = Field(default_factory=OtherFactors, description="Factores adicionales del paciente para refinar los parámetros del modelo.")
