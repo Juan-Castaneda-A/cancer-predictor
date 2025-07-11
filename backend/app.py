@@ -37,11 +37,7 @@ def create_app():
     # Aquí asumimos que FRONTEND_URL en tu Config es una cadena con las URLs separadas por coma.
     # O podrías obtenerla directamente de os.getenv si la quieres desde .env o Render.
     origins_list = Config.FRONTEND_URL.split(',') if isinstance(Config.FRONTEND_URL, str) else Config.FRONTEND_URL
-    CORS(app, resources={r"/api/*": {
-    "origins": origins_list, # Usamos la lista de orígenes
-    "methods": ["GET", "POST", "OPTIONS"],
-    "allow_headers": ["Content-Type"]
-    }})
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
     #Inicializa la base de datos con la aplicación
     db.init_app(app)
     #init_db(app)
