@@ -90,7 +90,7 @@ class PredictionService:
         
         return {"r": r_per_day, "K": K_cm3}
     
-    def _calculate_empirical_r(self, T_anterior: float, T_actual: float, time_diff_days: float) -> float:
+    def _calculate_empirical_r_exponential(self, T_anterior: float, T_actual: float, time_diff_days: float) -> float:
         """
         Calcula la tasa de crecimiento "r" empírica para el modelo exponencial entre dos mediciones.
         Retorna un valor negativo si el tumor disminuye.
@@ -110,6 +110,34 @@ class PredictionService:
             return -1.0 #Un valor representativo de regresión fuerte. Ajustar según necesidad.
         
         return math.log(T_actual/T_anterior)/time_diff_days
+    
+    def _calculate_empirical_r_gompertz(self, T_anterior: float, T_actual: float, time_diff_days: float, K: float) -> Optional[float]:
+        """Calcula la 'r' empírica para el modelo Gompertz. Devuelve None si no es posible."""
+        # Validaciones para evitar errores matemáticos
+        if time_diff_days <= 0 or T_anterior <= 0 or T_actual <= 0:
+            return None
+        if T_anterior >= K or T_actual >= K:
+            # No se puede calcular si el tamaño ya alcanzó o superó K
+            return None
+        
+        try:
+            log_term_actual = math.log(T_actual / K)
+            log_term_anterior = math.log(T_anterior / K)
+
+            if log_term_anterior == 0:
+                return None # Evita división por cero
+
+            ratio = log_term_actual / log_term_anterior
+            
+            if ratio <= 0:
+                return None # No se puede tomar logaritmo de un número no positivo
+
+            inner_log = math.log(ratio)
+            r = - (1 / time_diff_days) * inner_log
+            return r
+        except (ValueError, ZeroDivisionError):
+            # Si ocurre cualquier error matemático, el cálculo no es válido
+            return None
 
     def predict(self, identification_number: str, current_tumor_size: float,
                 current_measurement_date: date, patient_name: Optional[str]=None,
@@ -184,43 +212,56 @@ class PredictionService:
 
 
         # --- Cálculo y Priorización de 'r' (Empírica vs. Bibliográfica) ---
-        r_empirical = None
+        r_empirical_exp = None
+        r_empirical_gom = None
         if len(all_measurements) >= 2:
-            #Aseguramos que la penúltima medición es anterior a la última
             previous_measurement = all_measurements[-2]
             T_anterior = previous_measurement.size_cm3
             date_anterior = previous_measurement.measurement_date
-
             time_diff_days = (current_measurement_date - date_anterior).days
 
+            # Guardamos los datos de la medición anterior para transparencia
             patient_info["previous_tumor_size"] = T_anterior
             patient_info["previous_measurement_date"] = date_anterior.isoformat()
             patient_info["time_diff_days_for_r_calc"] = time_diff_days
 
-            if time_diff_days > 0 and T_anterior > 0:
-                try:
-                    r_empirical = self._calculate_empirical_r(T_anterior, current_tumor_size, time_diff_days)
-                    patient_info["r_empirical_calculated"] = r_empirical
-                except ValueError as ve:
-                    patient_info["r_empirical_calc_error"] = str(ve)
-                    interpretive_notes += "No se pudo calcular 'r' empírica debido a datos inválidos (ej. tiempo <= 0 o tamaño <= 0)."
+            # Solo procedemos si la diferencia de tiempo es válida
+            if time_diff_days > 0:
+                # Ya no necesitamos el try-except porque las funciones devuelven None en caso de fallo
+                r_empirical_exp = self._calculate_empirical_r_exponential(T_anterior, T_actual=current_tumor_size, time_diff_days=time_diff_days)
+                r_empirical_gom = self._calculate_empirical_r_gompertz(T_anterior, T_actual=current_tumor_size, time_diff_days=time_diff_days, K=K_final)
             else:
-                interpretive_notes += "No se pudo calcular 'r' empírica debido a una diferencia de tiempo no positiva o tamaño anterior inválido."
-        else:
-            interpretive_notes += "No hay suficientes mediciones previas para calcular 'r' empírica. Se utilizará la 'r' bibliográfica."
+                interpretive_notes += "No se pudo calcular 'r' empírica (diferencia de tiempo no positiva). "
         
+        # Guardamos los resultados del cálculo (serán None si fallaron)
+        patient_info["r_empirical_exp_calculated"] = r_empirical_exp
+        patient_info["r_empirical_gom_calculated"] = r_empirical_gom
+
         #Determinar la 'r' final a usar: priorizar empírica si es válida y positiva
-        if r_empirical is not None:
-            if r_empirical < 0:
-                prediction_status = "tumor_regressing"
-                interpretive_notes += f"¡El tumor está disminuyendo! Tasa de cambio empírica: {r_empirical:.4f} (por día). No se realizarán predicciones de tiempo a umbral."
-                r_final = r_empirical # Aún necesitamos este valor para la información de la curva si la mostramos
-            else:
-                r_final = r_empirical
-                interpretive_notes += f"Utilizando tasa de crecimiento empírica (r={r_final:.4f} por día). "
+        # Caso 1: Regresión del tumor (r_empirical_exp es negativo)
+        if r_empirical_exp is not None and r_empirical_exp < 0:
+            prediction_status = "tumor_regressing"
+            r_final_exp = r_empirical_exp
+            r_final_gom = r_empirical_exp # Usamos el mismo 'r' de regresión para ambos
+            interpretive_notes = f"¡El tumor está disminuyendo! Se usará la tasa de cambio empírica ({r_empirical_exp:.4f}) para ambos modelos."
         else:
-            r_final = r_bibliographic
-            interpretive_notes += f"Utilizando tasa de crecimiento bibliográfica (r={r_final:.4f} por día) debido a la falta de datos empíricos o un cálculo inválido. "
+            # Caso 2: Crecimiento o sin datos empíricos
+            if r_empirical_exp is not None:
+                r_final_exp = r_empirical_exp
+                interpretive_notes += "Modelo Exponencial: Usando tasa de crecimiento empírica. "
+            else:
+                r_final_exp = r_bibliographic
+                interpretive_notes += "Modelo Exponencial: Usando tasa bibliográfica por falta de datos empíricos. "
+            
+            if r_empirical_gom is not None:
+                r_final_gom = r_empirical_gom
+                interpretive_notes += "Modelo Gompertz: Usando tasa de crecimiento empírica. "
+            else:
+                r_final_gom = r_bibliographic
+                if len(all_measurements) < 2:
+                    interpretive_notes += "Modelo Gompertz: Usando tasa bibliográfica por falta de datos. "
+                else:
+                    interpretive_notes += "Modelo Gompertz: Usando tasa bibliográfica por cálculo empírico no válido/posible. "
 
         #K_final = K_bibliographic #Por ahora, K siempre es bibliográfica
 
@@ -298,7 +339,7 @@ class PredictionService:
                 if not (T0_for_models < T_critical_gompertz):
                     raise ValueError(f"Para Gompertz, se requiere T0 ({T0_for_models:.2f}) < Umbral Práctico ({T_critical_gompertz:.2f}).")
 
-                time_gompertz = gompertz_model.calculate_time_to_threshold_gompertz(T0_for_models, r_final, K_final, T_critical_gompertz)
+                time_gompertz = gompertz_model.calculate_time_to_threshold_gompertz(T0_for_models, r_final_gom, K_final, T_critical_gompertz)
                 curve_gompertz = gompertz_model.generate_gompertz_curve_points(T0_for_models, r_final, K_final, max_time_limit=time_gompertz * 1.5 if time_gompertz else 365*5)
                 lower_gompertz, upper_gompertz = gompertz_model.calculate_confidence_interval_gompertz(time_gompertz)
 
@@ -329,13 +370,15 @@ class PredictionService:
             "patient_info": patient_info, # Detalles del paciente, edad, etapa simplificada, etc.
             "parameters_used_for_prediction": {
                 "T0_for_models": T0_for_models,
-                "r_final": r_final,
+                #"r_final": r_final,
                 "K_final": K_final,
+                "r_bibliographic_value": r_bibliographic,
+                "r_empirical_exp_calculated": r_empirical_exp,
+                "r_empirical_gom_calculated": r_empirical_gom,
+                "r_final_exp_used": r_final_exp,
+                "r_final_gom_used": r_final_gom,
                 "T_critical_exponential_used": T_critical_exponential,
                 "T_critical_gompertz_used": T_critical_gompertz,
-                "r_bibliographic_value": r_bibliographic, # Añadir para transparencia
-                "K_bibliographic_value": K_bibliographic, # Añadir para transparencia
-                "r_empirical_calculated": patient_info.get("r_empirical_calculated") # Re-incluir si existe
             },
             "model_results": model_results # Contiene los resultados de ambos modelos
         }
