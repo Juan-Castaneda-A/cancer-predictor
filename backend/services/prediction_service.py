@@ -174,6 +174,10 @@ class PredictionService:
         model_results = {}
         T0_for_models = current_tumor_size
         T_critical_exponential, T_critical_gompertz = K_final, K_final * 0.99
+        
+        # --- CORRECCIÓN ---: Las definiciones de las fórmulas se añaden aquí
+        formula_exp = r"T(t) = T_0 \cdot e^{rt}"
+        formula_gompertz = r"T(t) = K \cdot \exp\left( \ln\left(\frac{T_0}{K}\right) \cdot \exp(-rt) \right)"
 
         if prediction_status == "tumor_regressing":
             try:
@@ -218,7 +222,7 @@ class PredictionService:
                 model_results["gompertz"] = {"error": f"Error en modelo Gompertz: {e}", "status": "error"}
 
         for model in ["exponential", "gompertz"]:
-            if model_results.get(model):
+            if model_results.get(model) and model_results[model].get("status") != "error":
                 model_results[model]["formula"] = formula_exp if model == "exponential" else formula_gompertz
         
         return {
