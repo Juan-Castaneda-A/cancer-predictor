@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+sqlmodel
+psycopg2-binary   # Driver para PostgreSQL
+scipy             # Matemáticas avanzadas
+numpy             # Cálculo numérico
+python-dotenv     # Para leer el archivo .env
+pydantic-settings # Gestión de configuración robusta
