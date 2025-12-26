@@ -21,6 +21,7 @@ class PredictionRequest(BaseModel):
     date_of_birth: Optional[date] = None
     new_measurement: MeasurementInput
     projection_days: int = Field(365, ge=30, le=1825) # Proyección entre 1 mes y 5 años
+    historical_data: List[Dict[str, Any]] = [] # [{'day': 0, 'size': 1.0, 'id': 5}, ...]
 
     @field_validator('date_of_birth')
     def birth_date_logic(cls, v):
@@ -52,3 +53,4 @@ class PredictionResponse(BaseModel):
     
     projections: Dict[str, List[Dict[str, Any]]] 
     interpretation: str
+    historical_data: List[Dict[str, Any]] = []

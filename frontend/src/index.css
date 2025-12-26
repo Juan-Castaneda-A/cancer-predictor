@@ -129,3 +129,20 @@
     color: var(--foreground);
   }
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #root, #root * {
+    visibility: visible;
+  }
+  /* Ocultar formulario e interfaz innecesaria al imprimir */
+  header, form, button { 
+    display: none !important; 
+  }
+  /* Asegurar que la gráfica se vea */
+  .recharts-wrapper, svg {
+    break-inside: avoid;
+  }
+}
